@@ -1,0 +1,9 @@
+/*
+ * CSS rules for visualization.
+ * Class namespacing is good practice.
+ */
+.chart-wrapper {
+    width: 100%;
+    padding: 20px;
+}
+
