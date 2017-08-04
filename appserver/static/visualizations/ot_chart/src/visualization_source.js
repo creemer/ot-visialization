@@ -8,8 +8,7 @@ define([
             'moment',
             'api/SplunkVisualizationBase',
             'api/SplunkVisualizationUtils',
-            'chart.js',
-            'chartjs-plugin-zoom'
+            'highcharts'
             // Add required assets to this list
         ],
         function(
@@ -18,7 +17,7 @@ define([
             moment,
             SplunkVisualizationBase,
             vizUtils,
-            Chart
+            HighCharts
         ) {
 
     // Extend from SplunkVisualizationBase
@@ -33,30 +32,13 @@ define([
             this.$el = $(this.el);
 
             this.uniqueId = `ot-chart-${Math.ceil(Math.random() * 100000000)}`
-            this.$el.append(`<canvas id="${this.uniqueId}" class="chart-wrapper"></canvas>`)
+            this.$el.append(`<div id="${this.uniqueId}"></div>`)
             // Initialization logic goes here
-
-
-            this.colors = {
-                background: [
-                    '#4271f4',
-                    '#ff1919',
-                    '#07912c'
-                ],
-                border: [
-                    '#668eff',
-                    '#ff4242',
-                    '#2e9b4b'
-                ]
-            }
         },
 
         // Optionally implement to format data returned from search.
         // The returned object will be passed to updateView as 'data'
         formatData: function(data) {
-
-            console.dir(data)
-
             if(data.rows.length < 1){
                 return false;
             }
@@ -82,11 +64,16 @@ define([
 
             let series = []
             otherFields.forEach((curVal, idx) => series.push({
-                label: data.fields[curVal].name,
-                backgroundColor: this.colors.background[idx % this.colors.border.length],
-                borderColor: this.colors.border[idx % this.colors.border.length],
+                yAxis: 0,
+                name: data.fields[curVal].name,
+                type: 'line',
+                //color: this.colors[idx % this.colors.length],
                 data: [],
-                fill: false
+                marker: {
+                    enabled: true
+                },
+                tooltip: {
+                }
             }))
 
             data.rows
@@ -96,10 +83,8 @@ define([
                 .forEach(curRow => {
                     for (let i = 0, len = otherFields.length; i < len; ++i) {
                         const curSeriesNum = otherFields[i]
-                        series[i].data.push({
-                            x: new Date(curRow[timeField]),
-                            y: i === 0 ? parseFloat(curRow[curSeriesNum]) : 40 + Math.ceil(Math.random() * 10)
-                        })
+                        series[i].data.push([new Date(curRow[timeField]).getTime(),
+                            i === 0 ? parseFloat(curRow[curSeriesNum]) : 40 + Math.ceil(Math.random() * 10)])
                     }
                 })
 
@@ -115,10 +100,11 @@ define([
 
             return sampleData
         },
-        drilldownLabel: function(label, clickedElement, event) {
+        drilldownLabel: function(event) {
+            const clickedTimestamp = new Date(event.point.x).getDate()
             const obj4Drilldown = {
-                earliest: moment(clickedElement.x.getTime() - 60000).toISOString(),
-                latest: moment(clickedElement.x.getTime() + 60000).toISOString()
+                earliest: moment(clickedTimestamp - 60000).toISOString(),
+                latest: moment(clickedTimestamp + 60000).toISOString()
             }
 
             console.log('Before drilldown event: ', JSON.stringify(obj4Drilldown, null, 4))
@@ -130,14 +116,13 @@ define([
         //  'config' will be the configuration property object
         updateView: function(data, config) {
             this.$el.find(`#${this.uniqueId}`).empty()
-            console.dir(data)
 
             if (!data.series) {
                 return
             }
 
             console.log('------------------------')
-            console.log('Before drawing chart.js')
+            console.log('Before drawing HighChart')
             console.log('------------------------')
 
             const containerHeight = this.$el.closest('.viz-controller').height()
@@ -145,61 +130,86 @@ define([
                 height: `${containerHeight - 30}px`
             })
 
-            const formatVal = this.getProperty('dateFormat') === 'dateTime' ? 'DD:MM:YYYY HH:mm:ss' : 'HH:mm:ss'
+            const formatTooltip = this.getProperty('dateFormatTooltip') === 'dateTime'
+                ? 'DD:MM:YYYY HH:mm:ss' : 'HH:mm:ss'
+            const formatAxis = this.getProperty('dateFormatAxis') === 'dateTime'
+                ? 'DD:MM:YYYY HH:mm:ss' : 'HH:mm:ss'
+            const yAxisName = this.getProperty('yAxisName')
 
-            const ctx = this.$el.find(`#${this.uniqueId}`)
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: data.series
+            const highChart = HighCharts.chart(this.uniqueId, {
+                chart: {
+                    zoomType: 'x',
+                    backgroundColor: "transparent",
                 },
-                options: {
-                    onClick: event => {
-                        const eventElements = myChart.getElementAtEvent(event)
-                        if (!eventElements || !eventElements.length) {
-                            console.log('Smth went wrong:', eventElements)
-                            return
+                plotOptions: {
+                    series: {
+                        events: {
+                            click: e => { this.drilldownLabel(e) }
                         }
-                        const { _datasetIndex, _index } = eventElements[0]
-                        const curSeries = data.series[_datasetIndex]
-                        const { label } = curSeries
-                        const clickedElement = curSeries.data[_index]
-                        console.log('Clicked element: ', label, clickedElement)
-                        this.drilldownLabel(label, clickedElement, event);
-                    },
-                    tooltips: {
-                        callbacks: {
-                            title: (tooltipItem, data) => moment(tooltipItem[0].xLabel).format('DD:MM:YYYY HH:mm:ss')
-                        }
-                    },
-                    zoom: {
-						enabled: true,
-                        drag: true,
-						mode: 'x',
-                        rangeMin: {
-                            // Format of min zoom range depends on scale type
-                            x: null,
-                            y: null
-                        },
-                        rangeMax: {
-                            // Format of max zoom range depends on scale type
-                            x: null,
-                            y: null
-                        }
-					},
-                    scales: {
-                        xAxes: [{
-                            type: 'time',
-                            unit: 'second',
-                            time: {
-                                displayFormats: {
-                                    hour: formatVal
-                                }
-                            },
-                            position: 'bottom'
-                        }]
                     }
-                }
+                },
+                colors: [
+                    '#237eb2',
+                    '#fbb902',
+                    '#d64848',
+                    '#07912c',
+                    '#903030',
+                    '#46c35b',
+                    '#4a1d6f',
+                    '#f60328',
+                    '#2d9c89'
+                ],
+                credits: {
+                    enabled: false,
+                },
+                title: {
+                    text: ''
+                },
+                subtitle: {
+                    text: ''
+                },
+                xAxis: [{
+                    type: 'datetime',
+                    labels: {
+                        formatter: function() {
+                            return moment(this.value).format(formatAxis)
+                        },
+                        rotation: 45,
+                        align: 'left'
+                    },
+                    crosshair: false
+                }],
+                yAxis: [{
+                    min: 0,
+                    labels: {
+                        style: {
+                            color: "#237eb2"
+                        }
+                    },
+                    title: {
+                        text: `${yAxisName}`,
+                        style: {
+                            color: "#237eb2"
+                        }
+                    },
+                    opposite: false
+                }],
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    formatter: function () {
+                        return `<strong>Time:</strong>: ${moment(this.x).format(formatTooltip)}<br>
+                            <strong>${this.series.name}</strong>: ${this.y}`
+                    },
+                    borderRadius: 5,
+                    borderWidth: 0,
+                    shadow: false,
+                    style: {
+                        color: "#fff"
+                    },
+                    //
+                    followTouchMove: false
+                },
+                series: data.series
             })
         },
 

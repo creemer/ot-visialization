@@ -1,8 +1,19 @@
-<form class="splunk-formatter-section" section-label="Назначения полей">
-    <splunk-control-group label='Формат даты'>
-        <splunk-select name="{{VIZ_NAMESPACE}}.dateFormat" value="time">
+<form class="splunk-formatter-section" section-label="Формат даты">
+    <splunk-control-group label='Формат даты для оси X'>
+        <splunk-select name="{{VIZ_NAMESPACE}}.dateFormatAxis" value="time">
             <option value="time">Только время</option>
             <option value="dateTime">Дата и время</option>
         </splunk-select>
+    </splunk-control-group>
+    <splunk-control-group label='Формат даты для всплывающего окна'>
+        <splunk-select name="{{VIZ_NAMESPACE}}.dateFormatTooltip" value="time">
+            <option value="time">Только время</option>
+            <option value="dateTime">Дата и время</option>
+        </splunk-select>
+    </splunk-control-group>
+</form>
+<form class="splunk-formatter-section" section-label="Называния">
+    <splunk-control-group label='Название оси Y'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.yAxisName"></splunk-text-input>
     </splunk-control-group>
 </form>
