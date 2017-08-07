@@ -89,32 +89,46 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            data.fields.forEach(function (curField, num) {
 	                if (curField.name === '_time') {
 	                    timeField = 0;
-	                } else {
+	                } else if (curField.name !== '_span') {
 	                    otherFields.push(num);
 	                }
 	            });
 
+	            var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
 	            var series = [];
+	            var numAxis = 0;
 	            otherFields.forEach(function (curVal, idx) {
 	                return series.push({
-	                    yAxis: 0,
+	                    yAxis: severalAxis && numAxis < 2 ? numAxis++ : 0,
 	                    name: data.fields[curVal].name,
 	                    type: 'line',
-	                    //color: this.colors[idx % this.colors.length],
 	                    data: [],
-	                    marker: {
-	                        enabled: true
-	                    },
 	                    tooltip: {}
 	                });
 	            });
+
+	            var gapeMode = this.getProperty('gapeMode') || 'blank';
 
 	            data.rows.sort(function (firstVal, secondVal) {
 	                return moment(firstVal[timeField]) < moment(secondVal[timeField]) ? -1 : 1;
 	            }).forEach(function (curRow) {
 	                for (var i = 0, len = otherFields.length; i < len; ++i) {
 	                    var curSeriesNum = otherFields[i];
-	                    series[i].data.push([new Date(curRow[timeField]).getTime(), i === 0 ? parseFloat(curRow[curSeriesNum]) : 40 + Math.ceil(Math.random() * 10)]);
+	                    var yVal = curRow[curSeriesNum];
+	                    var timestamp = new Date(curRow[timeField]).getTime();
+	                    if (yVal) {
+	                        series[i].data.push([timestamp, parseFloat(yVal)]);
+	                        continue;
+	                    }
+
+	                    switch (gapeMode) {
+	                        case 'blank':
+	                            series[i].data.push([timestamp, null]);
+	                            break;
+	                        case 'zeroes':
+	                            series[i].data.push([timestamp, 0]);
+	                            break;
+	                    }
 	                }
 	            });
 
@@ -146,6 +160,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        updateView: function updateView(data, config) {
 	            var _this = this;
 
+	            var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
+	            console.log('severalAxis: ', severalAxis, this.getProperty('severalYAxis'));
+
 	            this.$el.find('#' + this.uniqueId).empty();
 
 	            if (!data.series) {
@@ -161,16 +178,23 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                height: containerHeight - 30 + 'px'
 	            });
 
-	            var formatTooltip = this.getProperty('dateFormatTooltip') === 'dateTime' ? 'DD:MM:YYYY HH:mm:ss' : 'HH:mm:ss';
-	            var formatAxis = this.getProperty('dateFormatAxis') === 'dateTime' ? 'DD:MM:YYYY HH:mm:ss' : 'HH:mm:ss';
-	            var yAxisName = this.getProperty('yAxisName');
+	            var self = this;
+	            var yAxisName = this.getProperty('yAxisName') || '';
 
 	            var highChart = HighCharts.chart(this.uniqueId, {
 	                chart: {
 	                    zoomType: 'x',
 	                    backgroundColor: "transparent"
 	                },
+	                legend: {
+	                    enabled: this.getProperty('showLegend') === 'true'
+	                },
 	                plotOptions: {
+	                    line: {
+	                        marker: {
+	                            enabled: this.getProperty('showMarkers') === 'true'
+	                        }
+	                    },
 	                    series: {
 	                        events: {
 	                            click: function click(e) {
@@ -190,18 +214,49 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    text: ''
 	                },
 	                xAxis: [{
+	                    tickPixelInterval: parseInt(this.getProperty('tickInterval'), 10) || 50,
 	                    type: 'datetime',
 	                    labels: {
 	                        formatter: function formatter() {
-	                            return moment(this.value).format(formatAxis);
+	                            var formatOpts = self.getProperty('dateFormatAxis') || 'HH:mm:ss';
+	                            console.log('formatOpts ', formatOpts);
+	                            return moment(this.value).format(formatOpts);
 	                        },
-	                        rotation: 45,
+	                        rotation: parseInt(this.getProperty('xAngle'), 10) || 0,
 	                        align: 'left'
 	                    },
 	                    crosshair: false
 	                }],
-	                yAxis: [{
-	                    min: 0,
+	                yAxis: severalAxis ? [{
+	                    min: null,
+	                    labels: {
+	                        style: {
+	                            color: "#237eb2"
+	                        }
+	                    },
+	                    title: {
+	                        text: '',
+	                        style: {
+	                            color: "#237eb2"
+	                        }
+	                    },
+	                    opposite: false
+	                }, {
+	                    min: null,
+	                    labels: {
+	                        style: {
+	                            color: "#237eb2"
+	                        }
+	                    },
+	                    title: {
+	                        text: '',
+	                        style: {
+	                            color: "#237eb2"
+	                        }
+	                    },
+	                    opposite: true
+	                }] : [{
+	                    min: null,
 	                    labels: {
 	                        style: {
 	                            color: "#237eb2"
@@ -218,7 +273,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                tooltip: {
 	                    backgroundColor: 'rgba(0,0,0,0.7)',
 	                    formatter: function formatter() {
-	                        return '<strong>Time:</strong>: ' + moment(this.x).format(formatTooltip) + '<br>\n                            <strong>' + this.series.name + '</strong>: ' + this.y;
+	                        var formatOpts = self.getProperty('dateFormatTooltip') || 'HH:mm:ss';
+	                        console.log('formatOpts ', formatOpts);
+	                        return '<strong>Time:</strong>: ' + moment(this.x).format(formatOpts) + '<br>\n                            <strong>' + this.series.name + '</strong>: ' + this.y;
 	                    },
 	                    borderRadius: 5,
 	                    borderWidth: 0,

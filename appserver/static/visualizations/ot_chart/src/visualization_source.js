@@ -57,24 +57,24 @@ define([
             data.fields.forEach((curField, num) => {
                 if (curField.name === '_time') {
                     timeField = 0
-                } else {
+                } else if (curField.name !== '_span') {
                     otherFields.push(num)
                 }
             })
 
+            const severalAxis = this.getProperty('severalYAxis') === 'true' || false
             let series = []
+            let numAxis = 0
             otherFields.forEach((curVal, idx) => series.push({
-                yAxis: 0,
+                yAxis: severalAxis && numAxis < 2 ? numAxis++ : 0,
                 name: data.fields[curVal].name,
                 type: 'line',
-                //color: this.colors[idx % this.colors.length],
                 data: [],
-                marker: {
-                    enabled: true
-                },
                 tooltip: {
                 }
             }))
+
+            const gapeMode = this.getProperty('gapeMode') || 'blank'
 
             data.rows
                 .sort((firstVal, secondVal) => {
@@ -83,15 +83,27 @@ define([
                 .forEach(curRow => {
                     for (let i = 0, len = otherFields.length; i < len; ++i) {
                         const curSeriesNum = otherFields[i]
-                        series[i].data.push([new Date(curRow[timeField]).getTime(),
-                            i === 0 ? parseFloat(curRow[curSeriesNum]) : 40 + Math.ceil(Math.random() * 10)])
+                        const yVal = curRow[curSeriesNum]
+                        const timestamp = new Date(curRow[timeField]).getTime()
+                        if (yVal) {
+                            series[i].data.push([timestamp, parseFloat(yVal)])
+                            continue
+                        }
+
+                        switch (gapeMode) {
+                            case 'blank':
+                                series[i].data.push([timestamp, null])
+                                break
+                            case 'zeroes':
+                                series[i].data.push([timestamp, 0])
+                                break
+                        }
                     }
                 })
 
             console.log('----------Series-------------')
             console.dir(series)
             console.log('-----------------------------')
-
 
             // Format data
             const sampleData = {
@@ -115,6 +127,9 @@ define([
         //  'data' will be the data object returned from formatData or from the search
         //  'config' will be the configuration property object
         updateView: function(data, config) {
+            const severalAxis = this.getProperty('severalYAxis') === 'true' || false
+            console.log('severalAxis: ', severalAxis, this.getProperty('severalYAxis'))
+
             this.$el.find(`#${this.uniqueId}`).empty()
 
             if (!data.series) {
@@ -130,18 +145,23 @@ define([
                 height: `${containerHeight - 30}px`
             })
 
-            const formatTooltip = this.getProperty('dateFormatTooltip') === 'dateTime'
-                ? 'DD:MM:YYYY HH:mm:ss' : 'HH:mm:ss'
-            const formatAxis = this.getProperty('dateFormatAxis') === 'dateTime'
-                ? 'DD:MM:YYYY HH:mm:ss' : 'HH:mm:ss'
-            const yAxisName = this.getProperty('yAxisName')
+            const self = this
+            const yAxisName = this.getProperty('yAxisName') || ''
 
             const highChart = HighCharts.chart(this.uniqueId, {
                 chart: {
                     zoomType: 'x',
                     backgroundColor: "transparent",
                 },
+                legend: {
+                    enabled: this.getProperty('showLegend') === 'true'
+                },
                 plotOptions: {
+                    line: {
+                        marker: {
+                            enabled: this.getProperty('showMarkers') === 'true'
+                        }
+                    },
                     series: {
                         events: {
                             click: e => { this.drilldownLabel(e) }
@@ -169,18 +189,49 @@ define([
                     text: ''
                 },
                 xAxis: [{
+                    tickPixelInterval: parseInt(this.getProperty('tickInterval'), 10) || 50,
                     type: 'datetime',
                     labels: {
                         formatter: function() {
-                            return moment(this.value).format(formatAxis)
+                            const formatOpts = self.getProperty('dateFormatAxis') || 'HH:mm:ss'
+                            console.log('formatOpts ', formatOpts)
+                            return moment(this.value).format(formatOpts)
                         },
-                        rotation: 45,
+                        rotation: parseInt(this.getProperty('xAngle'), 10) || 0,
                         align: 'left'
                     },
                     crosshair: false
                 }],
-                yAxis: [{
-                    min: 0,
+                yAxis: severalAxis ? [{
+                    min: null,
+                    labels: {
+                        style: {
+                            color: "#237eb2"
+                        }
+                    },
+                    title: {
+                        text: '',
+                        style: {
+                            color: "#237eb2"
+                        }
+                    },
+                    opposite: false
+                }, {
+                    min: null,
+                    labels: {
+                        style: {
+                            color: "#237eb2"
+                        }
+                    },
+                    title: {
+                        text: '',
+                        style: {
+                            color: "#237eb2"
+                        }
+                    },
+                    opposite: true
+                }] :[{
+                    min: null,
                     labels: {
                         style: {
                             color: "#237eb2"
@@ -197,7 +248,9 @@ define([
                 tooltip: {
                     backgroundColor: 'rgba(0,0,0,0.7)',
                     formatter: function () {
-                        return `<strong>Time:</strong>: ${moment(this.x).format(formatTooltip)}<br>
+                        const formatOpts = self.getProperty('dateFormatTooltip') || 'HH:mm:ss'
+                        console.log('formatOpts ', formatOpts)
+                        return `<strong>Time:</strong>: ${moment(this.x).format(formatOpts)}<br>
                             <strong>${this.series.name}</strong>: ${this.y}`
                     },
                     borderRadius: 5,
