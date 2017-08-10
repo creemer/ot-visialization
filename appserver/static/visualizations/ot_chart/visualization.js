@@ -294,7 +294,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        getInitialDataParams: function getInitialDataParams() {
 	            return {
 	                outputMode: SplunkVisualizationBase.ROW_MAJOR_OUTPUT_MODE,
-	                count: 10000
+	                count: 0
 	            };
 	        },
 
