@@ -227,7 +227,8 @@ define([
                     },
                     opposite: true
                 }] :[{
-                    min: null,
+                    min: parseFloat(this.getProperty('minY')) || null,
+                    max: parseFloat(this.getProperty('maxY')) || null,
                     labels: {
                         style: {
                             color: "#237eb2"
