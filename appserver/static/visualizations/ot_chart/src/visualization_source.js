@@ -8,7 +8,8 @@ define([
             'moment',
             'api/SplunkVisualizationBase',
             'api/SplunkVisualizationUtils',
-            'highcharts'
+            'highcharts',
+            './highcharts-downsample'
             // Add required assets to this list
         ],
         function(
@@ -17,8 +18,11 @@ define([
             moment,
             SplunkVisualizationBase,
             vizUtils,
-            HighCharts
+            HighCharts,
+            Downsample
         ) {
+
+    Downsample.initDownsample(HighCharts)
 
     // Extend from SplunkVisualizationBase
     return SplunkVisualizationBase.extend({
@@ -39,26 +43,18 @@ define([
         // Optionally implement to format data returned from search.
         // The returned object will be passed to updateView as 'data'
         formatData: function(data) {
-            if(data.rows.length < 1){
+            if(data.results.length < 1){
                 return false;
             }
-            var datum = vizUtils.escapeHtml(parseFloat(data.rows[0][0]));
-
-            // Check for invalid data
-            if(_.isNaN(datum)){
-                throw new SplunkVisualizationBase.VisualizationError(
-                    'Only supports numbers'
-                );
-            }
+            console.log('Begin date formatting')
+            console.time('FormatData')
 
             //return datum;
             let timeField = 0
             let otherFields = []
             data.fields.forEach((curField, num) => {
-                if (curField.name === '_time') {
-                    timeField = 0
-                } else if (curField.name !== '_span') {
-                    otherFields.push(num)
+                if (!~curField.name.indexOf('_span') && curField.name !== '_time') {
+                    otherFields.push(curField.name)
                 }
             })
 
@@ -66,8 +62,11 @@ define([
             let series = []
             let numAxis = 0
             otherFields.forEach((curVal, idx) => series.push({
+                downsample: {
+                    threshold: parseInt(this.getProperty('downSampled'), 10) || 0
+                },
                 yAxis: severalAxis && numAxis < 2 ? numAxis++ : 0,
-                name: data.fields[curVal].name,
+                name: curVal,
                 type: 'line',
                 data: [],
                 tooltip: {
@@ -76,15 +75,18 @@ define([
 
             const gapeMode = this.getProperty('gapeMode') || 'blank'
 
-            data.rows
-                .sort((firstVal, secondVal) => {
-                    return moment(firstVal[timeField]) < moment(secondVal[timeField]) ? -1 : 1
-                })
-                .forEach(curRow => {
+            if (this.getProperty('needSort') === 'true') {
+                data.results
+                    .sort((firstVal, secondVal) => {
+                        return moment(firstVal._time) < moment(secondVal._time) ? -1 : 1
+                    })
+            }
+
+            data.results
+                .forEach(curResult => {
                     for (let i = 0, len = otherFields.length; i < len; ++i) {
-                        const curSeriesNum = otherFields[i]
-                        const yVal = curRow[curSeriesNum]
-                        const timestamp = new Date(curRow[timeField]).getTime()
+                        const yVal = curResult[otherFields[i]]
+                        const timestamp = new Date(curResult._time).getTime()
                         if (yVal) {
                             series[i].data.push([timestamp, parseFloat(yVal)])
                             continue
@@ -101,16 +103,9 @@ define([
                     }
                 })
 
-            console.log('----------Series-------------')
-            console.dir(series)
-            console.log('-----------------------------')
+            console.timeEnd('FormatData')
 
-            // Format data
-            const sampleData = {
-                series
-            }
-
-            return sampleData
+            return { series }
         },
         drilldownLabel: function(event) {
             const clickedTimestamp = new Date(event.point.x).getDate()
@@ -135,6 +130,7 @@ define([
             if (!data.series) {
                 return
             }
+            console.time('updateView')
 
             console.log('------------------------')
             console.log('Before drawing HighChart')
@@ -264,12 +260,14 @@ define([
                 },
                 series: data.series
             })
+
+            console.timeEnd('updateView')
         },
 
         // Search data params
         getInitialDataParams: function() {
             return ({
-                outputMode: SplunkVisualizationBase.ROW_MAJOR_OUTPUT_MODE,
+                outputMode: SplunkVisualizationBase.RAW_OUTPUT_MODE,
                 count: 0
             });
         },
