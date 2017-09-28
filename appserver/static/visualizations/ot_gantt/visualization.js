@@ -84,8 +84,8 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            // Initialization logic goes here
 	            // TODO add more colors
 	            this.colors = [
-	                '#aa0000',
 	                '#00aa00',
+	                '#aa0000',
 	                '#0000aa',
 	                '#46615e',
 	                '#727d6f',
@@ -98,6 +98,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	          return days * 24 * 60 * 60 * 1000;
 	        },
 	        initValsAndCats: function(data) {
+	        	var self = this;
 	            this.initedCats = true;
 	            var rows = data.rows;
 	            var fields = data.fields;
@@ -105,6 +106,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            var stateName = this.getProperty('state');
 	            var timeName = '_time';
 	            var durationName = this.getProperty('duration');
+	            var idxName = this.getProperty('catIndex');
 
 	            for (var i = 0, len = fields.length; i < len; ++i) {
 	                if (fields[i].name === categoryName) {
@@ -124,6 +126,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
 	                if (fields[i].name === durationName) {
 	                    this.durationNum = i;
+	                }
+
+	                if (fields[i].name === idxName) {
+	                	this.idxNum = i;
 	                }
 	            }
 
@@ -146,10 +152,24 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            this.statesColors = {};
 
 	            var i = 0;
-	            for(var key in states) {
-	                this.statesColors[key] = this.colors[i++ % this.colors.length];
-	            }
+	            var normalColor = this.getProperty('normailColor') || '#00aa00';
+	            var failColor = this.getProperty('failColor') || '#aa0000';
 
+	            console.log('normalColor: ', normalColor);
+	            console.log('failColor: ', failColor);
+
+	            console.log('states: ', JSON.stringify(states, null, 4))
+	            if (Object.keys(states).length === 2) {
+	            	console.log('Right way');
+					for(var key in states) {
+						this.statesColors[key] = (key === 'Норма') ? normalColor : failColor;
+					}
+				} else {
+					for(var key in states) {
+						this.statesColors[key] = this.colors[i++ % this.colors.length];
+					}
+				}
+	            
 	            this.categories = _.uniq(this.categories);
 
 	            this.initedCats = true;
@@ -173,18 +193,19 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            for (var i = 0, len = this.categories.length; i < len; ++i) {
 	                categories[this.categories[i]] = {
 	                    category: this.categories[i],
+	                    idx: -1,
 	                    segments: []
 	                }
 	            }
-
-	            console.dir(categories);
-
 
 	            for (var i = 0, len = rows.length; i < len; ++i) {
 	                var curRow = rows[i];
 	                var curCategory = curRow[this.catNum];
 	                var start = moment(curRow[this.timeNum]).diff(this.startDate, 'seconds');
+	                categories[curCategory].idx = this.idxNum ? curRow[this.idxNum] : -1;
 	                categories[curCategory].segments.push({
+	                	"formattedStart": moment(curRow[this.timeNum]).format('HH:mm:ss'),
+	                	"formattedEnd": moment(curRow[this.timeNum]).add(curRow[this.durationNum], 'seconds').format('HH:mm:ss'),
 	                    "start": start,
 	                    "category": curCategory,
 	                    "end": start + Math.ceil(curRow[this.durationNum]),
@@ -193,14 +214,22 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                });
 	            }
 
-	            var retCategories = _.map(categories, function(value) {
+	            var categories = _.map(categories, function(value) {
 	                return value;
-	            })
+	            });
+	            var retCategories = categories.sort(function(val1, val2) {
+	            	if (val1.idx !== -1 && val2.idx !== -1) {
+	            		console.log('IDX');
+		            	return val1.idx < val2.idx ? -1 : 1;
+	            	} else {
+	            		console.log('CATEGORY');
+		            	return val1.category < val2.category ? -1 : 1
+	            	}
+	            });
 
 	            return retCategories;
 	        },
 	        drilldownToTimeRangeAndCategory: function(earliestTime, latestTime, categoryName, categoryValue, browserEvent) {
-	            console.log('Before drilldown event', arguments);
 	            var data = {};
 	            data[categoryName] = categoryValue;
 
@@ -269,19 +298,15 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                "marginRight": 70,
 	                "period": "ss",
 	                "dataDateFormat": "YYYY-MM-DDTHH:mm:ss.sssZ",
-	                "balloonDateFormat": "JJ:NN",
+	                "balloonDateFormat": "HH:mm:ss",
 	                "columnWidth": 0.5,
 	                "valueAxis": {
 	                    "type": "date"
 	                },
-	                "zoomControl": {
-	                	iconSize: 0,
-	                	zoomControlEnabled: false
-	                },
-	                "brightnessStep": 10,
+	                "brightnessStep": this.getProperty('needGradient') === 'true' ? 1 : 0,
 	                "graph": {
 	                    "fillAlphas": 1,
-	                    "balloonText": "<b>State: [[task]]</b>: [[open]] [[value]]"
+	                    "balloonText": "<b>[[task]]</b>: [[formattedStart]] [[formattedEnd]]"
 	                },
 	                "rotate": true,
 	                "categoryField": "category",
@@ -2554,7 +2579,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                d.getPath());
 	            void 0 === this.path && (this.path = "amcharts/");
 	            this.path = d.normalizeUrl(this.path);
-	            void 0 === this.pathToImages && (this.pathToImages = Splunk.util.make_full_url('/static/app/ot_visualizations/visualizations/ot_gantt/node_modules/amcharts/images//')); // this.path + "images/");
+	            void 0 === this.pathToImages && (this.pathToImages = Splunk.util.make_full_url('/static/app/ot_visualizations/visualizations/ot_gantt//')); // this.path + "images/");
 	            this.initHC || (d.callInitHandler(this), this.initHC = !0);
 	            d.applyLang(this.language, this);
 	            var a = this.numberFormatter;
@@ -8215,7 +8240,6 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	    };
 	    d.getDate = function(a, b, c) {
 	        var answ = a instanceof Date ? d.newDate(a, c) : b && isNaN(a) ? d.stringToDate(a, b) : new Date(a)
-	        console.log('getDate: ', a, b, c, answ)
 	        return a instanceof Date ? d.newDate(a, c) : b && isNaN(a) ? d.stringToDate(a, b) : new Date(a)
 	    };
 	    d.daysInMonth = function(a) {
@@ -35970,8 +35994,6 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                            for (p in n) k = n[p] + "Field", (t = this.graph[k]) && void 0 !== d[t] && (l[n[p] + "_" + a + "_" + g] = d[t]);
 	                            t = h;
 	                            if (A) {
-	                            	console.log(F, d[F])
-	                            	console.log(G, d[G])
 	                                k = b.getDate(d[F], u, f);
 	                                var B = b.getDate(d[G], u, f);
 	                                r && (isNaN(c) || (k = b.changeDate(b.newDate(r, "fff"), f, c * q, !0, !0)), isNaN(h) || (B = b.changeDate(b.newDate(r, "fff"), f, h * q, !0, !0)));

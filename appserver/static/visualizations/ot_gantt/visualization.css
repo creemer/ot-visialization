@@ -362,5 +362,17 @@
 
 .gantt-wrapper {
   width: 100%;
-  height: 500px;
+  height: 300px;
+}
+
+.amcharts-export-menu, .export-main {
+	display: none !important;
+}
+
+.amcharts-zoom-out-image {
+	display: none !important;
+}
+
+.amcharts-zoom-out-label {
+	fill: white !important;
 }

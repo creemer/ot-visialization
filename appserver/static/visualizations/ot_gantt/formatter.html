@@ -8,4 +8,23 @@
     <splunk-control-group label='Поле State'>
 	    <splunk-text-input name="{{VIZ_NAMESPACE}}.state"></splunk-text-input>
     </splunk-control-group>
+    <splunk-control-group label='Поле приоритата категорий'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.catIndex"></splunk-text-input>
+    </splunk-control-group>
+</form>
+<form class="splunk-formatter-section" section-label="Выбор цвета">
+    <splunk-control-group label='Цвет аварийного состояния'>
+    	<splunk-text-input name="{{VIZ_NAMESPACE}}.failColor"></splunk-text-input>
+    </splunk-control-group>
+    <splunk-control-group label='Цвет нормального состояния'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.normalColor"></splunk-text-input>
+    </splunk-control-group>
+</form>
+<form class="splunk-formatter-section" section-label="Поведение">
+    <splunk-control-group label='Градиент цвета'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.needGradient" value="false">
+            <option value="true">Вкл</option>
+            <option value="false">Выкл</option>
+        </splunk-radio-input>
+    </splunk-control-group>
 </form>

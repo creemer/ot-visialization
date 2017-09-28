@@ -188,7 +188,7 @@ define([
             var propertyValue = config[this.getPropertyNamespaceInfo().propertyNamespace + name];
             return vizUtils.escapeHtml(propertyValue);
         },
-        drawChart(data, config) {
+        drawChart: function(data, config) {
             console.log('There will be the chart drawing soon');
         },
 
