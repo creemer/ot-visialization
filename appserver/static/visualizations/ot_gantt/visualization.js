@@ -311,9 +311,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 					ganttHeight += '';
 				};
 				
-				// задаём высоту блоку .gantt-wrapper - контейнеру графика.
+				// задаём высоту ганту по id - контейнеру графика.
+				var id = '#' + this.uniqViewNum;
 	        	if (ganttHeight > 0) {
-	        		$('.gantt-wrapper').css({
+	        		$(id).css({
 	        			height: ganttHeight
 	        		})
 				};
