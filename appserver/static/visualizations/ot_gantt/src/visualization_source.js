@@ -1,6 +1,10 @@
 /*
  * Visualization source
  */
+
+/*
+                НЕ БИЛДИТЬ!!! ПРАВИТЬ ПРЯМО В ФАЙЛЕ visualization.js (!!!!!!!!)
+*/
 define([
             'jquery',
             'underscore',

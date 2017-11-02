@@ -109,9 +109,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            var durationName = this.getProperty('duration');
 	            var idxName = this.getProperty('catIndex');
 				var normVal = this.getProperty('normVal');
-				//&& (this.getProperty('normVal') !== '') && this.getProperty('normVal');
 				var failVal = this.getProperty('failVal');
-				//&& (this.getProperty('failVal') !== '') && this.getProperty('failVal');
 				var mediumVal = this.getProperty('mediumVal');
 
 	            for (var i = 0, len = fields.length; i < len; ++i) {
@@ -174,17 +172,14 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            	console.log('Right way');
 					for(var key in states) {
 						if (key == normVal) {
-							console.log('from normal');
 							this.statesColors[key] = normalColor;
 							continue;
 						};
 						if (key == failVal) {
-							console.log('from fail');
 							this.statesColors[key] = failColor;
 							continue;
 						};
 						if (key == mediumVal) {
-							console.log('from medium');
 							this.statesColors[key] = mediumColor;
 							continue;
 						}
