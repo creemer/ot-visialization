@@ -19,8 +19,22 @@
     <splunk-control-group label='Цвет нормального состояния'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.normalColor"></splunk-text-input>
     </splunk-control-group>
+    <splunk-control-group label='Цвет нейтрального состояния'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.mediumColor"></splunk-text-input>
+    </splunk-control-group>
 </form>
 <form class="splunk-formatter-section" section-label="Поведение">
+    <splunk-control-group label='Значение, обозначающее норму'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.normVal"></splunk-text-input>
+    </splunk-control-group>
+    <splunk-control-group label='Значение, обозначающее отказ'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.failVal"></splunk-text-input>
+    </splunk-control-group>
+    <splunk-control-group label='Нейтральное значение'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.mediumVal"></splunk-text-input>
+    </splunk-control-group>
+</form>
+<form class="splunk-formatter-section" section-label="Вид">
     <splunk-control-group label='Градиент цвета'>
         <splunk-radio-input name="{{VIZ_NAMESPACE}}.needGradient" value="false">
             <option value="true">Вкл</option>
@@ -47,11 +61,5 @@
     </splunk-control-group>
     <splunk-control-group label='Высота диаграммы'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.ganttHeight"></splunk-text-input>
-    </splunk-control-group>
-    <splunk-control-group label='Значение, обозначающее норму'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.normVal"></splunk-text-input>
-    </splunk-control-group>
-    <splunk-control-group label='Значение, обозначающее отказ'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.failVal"></splunk-text-input>
     </splunk-control-group>
 </form>

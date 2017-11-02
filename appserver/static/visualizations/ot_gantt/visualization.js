@@ -108,8 +108,11 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            var timeName = '_time';
 	            var durationName = this.getProperty('duration');
 	            var idxName = this.getProperty('catIndex');
-	            var normVal = this.getProperty('normVal') && (this.getProperty('normVal') !== '') && this.getProperty('normVal');
-	            var failVal = this.getProperty('failVal') && (this.getProperty('failVal') !== '') && this.getProperty('failVal');
+				var normVal = this.getProperty('normVal');
+				//&& (this.getProperty('normVal') !== '') && this.getProperty('normVal');
+				var failVal = this.getProperty('failVal');
+				//&& (this.getProperty('failVal') !== '') && this.getProperty('failVal');
+				var mediumVal = this.getProperty('mediumVal');
 
 	            for (var i = 0, len = fields.length; i < len; ++i) {
 	                if (fields[i].name === categoryName) {
@@ -155,22 +158,35 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            this.statesColors = {};
 
 	            var i = 0;
-	            var normalColor = this.getProperty('normailColor') || '#00aa00';
+	            var normalColor = this.getProperty('normalColor') || '#00aa00';
 	            var failColor = this.getProperty('failColor') || '#aa0000';
-
+				var mediumColor = this.getProperty('mediumColor') || '#0000aa';
+				
+				console.log('-------Init-------------');
 	            console.log('normalColor: ', normalColor);
 	            console.log('failColor: ', failColor);
-
-				console.log('states: ', JSON.stringify(states, null, 4))
+	            console.log('mediumColor: ', mediumColor);
+	            console.log('states: ', states);
+	            console.log('statesColors: ', this.statesColors);
 				
 	            var keysLen = Object.keys(states).length
-	            if (keysLen <= 2  && (normVal || failVal)) {
+	            if (keysLen <= 3  && (normVal || failVal || mediumVal)) {
 	            	console.log('Right way');
 					for(var key in states) {
-						if (normVal) {
-							this.statesColors[key] = (key === normVal) ? normalColor : failColor;
-						} else if (failVal) {
-							this.statesColors[key] = (key === failVal) ? failColor : normalColor;
+						if (key == normVal) {
+							console.log('from normal');
+							this.statesColors[key] = normalColor;
+							continue;
+						};
+						if (key == failVal) {
+							console.log('from fail');
+							this.statesColors[key] = failColor;
+							continue;
+						};
+						if (key == mediumVal) {
+							console.log('from medium');
+							this.statesColors[key] = mediumColor;
+							continue;
 						}
 					}
 				} else {
@@ -183,8 +199,8 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
 				this.initedCats = true;
 
-				console.log('-----------------------');
-				console.log('Categories from init', categories);
+
+				console.log('Categories from init', this.categories);
 				console.log('-----------------------');
 	        },
 
@@ -227,8 +243,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                });
 				};
 				
-				console.log('-----------------------');
+				console.log('---------format--------');
 				console.log('Categories from format', categories);
+				console.log('stateColors from format', this.statesColors);
 				console.log('-----------------------');
 
 	            var categories = _.map(categories, function(value) {
@@ -248,17 +265,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	        },
 	        drilldownToTimeRangeAndCategory: function(earliestTime, latestTime, categoryName, categoryValue, browserEvent) {
 	            var data = {};
-	            data[categoryName] = categoryValue;
-
-	            console.dir(this);
-	            console.dir(this.drilldown);
-	            console.log('Time:');
-	            console.log(latestTime, earliestTime, latestTime - earliestTime)
-	            console.log('-------------')
+				data[categoryName] = categoryValue;
+				
 	            var earliest = this.startDate.clone().add(earliestTime, 'seconds').format();
-	            console.log('earliest: ', earliest);
 	            var latest = this.startDate.clone().add(latestTime, 'seconds').format();
-	            console.log('latest__: ', latest);
 
 	            var obj4Drilldown = {
 	                action: SplunkVisualizationBase.FIELD_VALUE_DRILLDOWN,
@@ -266,9 +276,6 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                earliest: earliest,
 	                latest: latest
 	            };
-
-	            console.log('obj4Drilldown: ', JSON.stringify(obj4Drilldown, null, 4));
-	            console.dir(this.drilldown)
 
 	            this.drilldown(obj4Drilldown, browserEvent, function(err, res) {
 	                console.log('Callback for drilldown: ', err, res);
@@ -331,11 +338,12 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                    title: i,
 	                    color: this.statesColors[i]
 	                });
-	            }
+				}
 
-	            console.log("this.startDate.format('hh:mm:ss')", this.startDate.format('hh:mm:ss'))
-	            console.log("this.startDate.format('YYYY-MM-DD')", this.startDate.format('YYYY-MM-DD'))
-	            console.dir(categories)
+				console.log('--------update---------');
+				console.log('Categories from update', categories);
+				console.log('stateColors from update', this.statesColors);
+				console.log('-----------------------');
 
 	            var chart = AmCharts.makeChart(this.uniqViewNum, {
 	                "type": "gantt",
@@ -347,6 +355,8 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                "columnWidth": 0.5,
 	                "valueAxis": {
 						"type": "date",
+						"gridThickness": 0, // толщина линий сетки
+						"axisThickness": 0,
 						"labelsEnabled": visibilityAxisLabels // убирает лейблы значений на графике
 	                },
 	                "brightnessStep": this.getProperty('needGradient') === 'true' ? 1 : 0,
