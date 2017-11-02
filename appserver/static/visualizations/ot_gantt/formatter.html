@@ -27,4 +27,31 @@
             <option value="false">Выкл</option>
         </splunk-radio-input>
     </splunk-control-group>
+    <splunk-control-group label='Легенда'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.visibilityLegend" value="false">
+            <option value="true">Вкл</option>
+            <option value="false">Выкл</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+    <splunk-control-group label='Scrollbar'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.visibilityScrollBar" value="false">
+            <option value="true">Вкл</option>
+            <option value="false">Выкл</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+    <splunk-control-group label='Лейблы осей'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.visibilityAxisLabels" value="false">
+            <option value="true">Вкл</option>
+            <option value="false">Выкл</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+    <splunk-control-group label='Высота диаграммы'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.ganttHeight"></splunk-text-input>
+    </splunk-control-group>
+    <splunk-control-group label='Значение, обозначающее норму'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.normVal"></splunk-text-input>
+    </splunk-control-group>
+    <splunk-control-group label='Значение, обозначающее отказ'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.failVal"></splunk-text-input>
+    </splunk-control-group>
 </form>
