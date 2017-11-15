@@ -80,7 +80,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            this.uniqViewNum = 'Gantt-' + Math.ceil(Math.random() * 10000);
 
 	            this.$el.append('<div id="' + this.uniqViewNum + '" class="gantt-wrapper"></div>');
-	            this.initedCats = false;
+				this.initedCats = false;
+				
+				this.ganttHeight = '70';
 
 	            // Initialization logic goes here
 	            // TODO add more colors
@@ -111,6 +113,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 				var normVal = this.getProperty('normVal');
 				var failVal = this.getProperty('failVal');
 				var mediumVal = this.getProperty('mediumVal');
+				this.ganttHeight = this.getProperty('ganttHeight');
 
 	            for (var i = 0, len = fields.length; i < len; ++i) {
 	                if (fields[i].name === categoryName) {
@@ -160,16 +163,17 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            var failColor = this.getProperty('failColor') || '#aa0000';
 				var mediumColor = this.getProperty('mediumColor') || '#0000aa';
 				
-				console.log('-------Init-------------');
-	            console.log('normalColor: ', normalColor);
-	            console.log('failColor: ', failColor);
-	            console.log('mediumColor: ', mediumColor);
-	            console.log('states: ', states);
-	            console.log('statesColors: ', this.statesColors);
+				// console.log('-------Init-------------');
+	            // console.log('normalColor: ', normalColor);
+	            // console.log('failColor: ', failColor);
+	            // console.log('mediumColor: ', mediumColor);
+	            // console.log('states: ', states);
+	            // console.log('statesColors: ', this.statesColors);
 				
+				// Привязываем цвета к значениям.
 	            var keysLen = Object.keys(states).length
 	            if (keysLen <= 3  && (normVal || failVal || mediumVal)) {
-	            	console.log('Right way');
+	            	//console.log('Right way');
 					for(var key in states) {
 						if (key == normVal) {
 							this.statesColors[key] = normalColor;
@@ -193,16 +197,11 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            this.categories = _.uniq(this.categories);
 
 				this.initedCats = true;
-
-
-				console.log('Categories from init', this.categories);
-				console.log('-----------------------');
 	        },
 
 	        // Optionally implement to format data returned from search. 
 	        // The returned object will be passed to updateView as 'data'
 	        formatData: function(data, config) {
-
 	            var rows = data.rows;
 
 	            this.startDate = moment().subtract(0, 'hours');
@@ -238,10 +237,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                });
 				};
 				
-				console.log('---------format--------');
-				console.log('Categories from format', categories);
-				console.log('stateColors from format', this.statesColors);
-				console.log('-----------------------');
+				// console.log('---------format--------');
+				// console.log('Categories from format', categories);
+				// console.log('stateColors from format', this.statesColors);
+				// console.log('-----------------------');
 
 	            var categories = _.map(categories, function(value) {
 	                return value;
@@ -290,12 +289,16 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	        //  'config' will be the configuration property object
 	        updateView: function(categories, config) {
 
-				var ganttHeight = this.getProperty('ganttHeight') || -1;
+				var ganttHeight = this.ganttHeight;
 				var visibilityScrollBar = this.getProperty('visibilityScrollBar') === 'true';
 				var visibilityLegend = this.getProperty('visibilityLegend') === 'true';
 				var visibilityAxisLabels = this.getProperty('visibilityAxisLabels') === 'true';
 				var minHeight = '32';
 
+				// console.log('--------------------');
+				// console.log('config', config);
+				// console.log('--------------------');
+				
 				if(visibilityAxisLabels) {
 					minHeight = '52';
 				};
@@ -336,15 +339,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                });
 				}
 
-				console.log('--------update---------');
-				console.log('Categories from update', categories);
-				console.log('stateColors from update', this.statesColors);
-				console.log('-----------------------');
-
 	            var chart = AmCharts.makeChart(this.uniqViewNum, {
 	                "type": "gantt",
 	                "theme": "light",
-	                "marginRight": 70,
+	                "marginRight": 40,
 	                "period": "ss",
 	                "dataDateFormat": "YYYY-MM-DDTHH:mm:ss.sssZ",
 	                "balloonDateFormat": "HH:mm:ss",
@@ -410,8 +408,18 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                        self.drilldownToTimeRangeAndCategory(item.start, item.end, categoryName, item.category, e);
 	                    }
 	                }]
-	            });
-	        },
+				});
+				
+				$(id).css('position', 'relative');
+				var button = document.createElement('div');
+				button.setAttribute('id', 'btn-full-screen-gantt');
+				button.innerHTML = '&#128269;';
+
+				$(id).append(button);
+
+				button.addEventListener('click', (event) => { this.fullScreen(event, 'Gantt-'); })
+
+	        }, // End UpdateView
 
 	        // Search data params
 	        getInitialDataParams: function() {
@@ -419,7 +427,34 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                outputMode: SplunkVisualizationBase.ROW_MAJOR_OUTPUT_MODE,
 	                count: 10000
 	            });
-	        },
+			},
+			
+			fullScreen: function(event, idLooksLike) {
+				if(document.mozFullScreen || document.webkitIsFullScreen || window.innerHeight == screen.height) {
+					if (document.cancelFullScreen) {
+						document.cancelFullScreen();
+						return;
+					} else if (document.mozCancelFullScreen) {
+						document.mozCancelFullScreen();
+						return;
+					} else if (document.webkitCancelFullScreen) {
+						document.webkitCancelFullScreen();
+						return;
+					}
+				};
+
+				var elem = document.getElementById(this.uniqViewNum);
+	
+				if (elem.requestFullscreen) {
+					elem.requestFullscreen();
+				} else if (elem.mozRequestFullScreen) {
+					elem.mozRequestFullScreen();
+				} else if (elem.webkitRequestFullscreen) {
+					elem.webkitRequestFullscreen();
+				} else if (elem.msRequestFullscreen) {
+					elem.msRequestFullscreen();
+				}
+			},
 
 	        // Override to respond to re-sizing events
 	        reflow: function() {}

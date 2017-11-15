@@ -42,3 +42,6 @@ export = system
 
 [visualizations/ot_chart]
 export = system
+
+[visualizations/ot_amchart]
+export = system

@@ -80,8 +80,6 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            if (data.results.length < 1) {
 	                return false;
 	            }
-	            console.log('Begin date formatting');
-	            console.time('FormatData');
 
 	            //return datum;
 	            var timeField = 0;
@@ -134,10 +132,8 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                            break;
 	                    }
 	                }
-	            });
-
-	            console.timeEnd('FormatData');
-
+				});
+				
 	            return { series: series };
 	        },
 	        drilldownLabel: function drilldownLabel(event) {
@@ -158,18 +154,20 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            var _this2 = this;
 
 	            var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
-	            console.log('severalAxis: ', severalAxis, this.getProperty('severalYAxis'));
+	            //console.log('severalAxis: ', severalAxis, this.getProperty('severalYAxis'));
 
 	            this.$el.find('#' + this.uniqueId).empty();
 
 	            if (!data.series) {
 	                return;
 	            }
-	            console.time('updateView');
+	            // console.time('updateView');
 
-	            console.log('------------------------');
-	            console.log('Before drawing HighChart');
-	            console.log('------------------------');
+	            // console.log('------------------------');
+	            // console.log('Before drawing HighChart');
+	            // console.log('data.series', data.series);
+	            // console.log('data', data);
+	            // console.log('------------------------');
 
 	            var containerHeight = this.$el.closest('.viz-controller').height();
 	            this.$el.find('#' + this.uniqueId).css({
@@ -186,7 +184,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                },
 	                legend: {
 	                    enabled: this.getProperty('showLegend') === 'true'
-	                },
+					},
 	                plotOptions: {
 	                    line: {
 	                        marker: {
@@ -217,7 +215,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    labels: {
 	                        formatter: function formatter() {
 	                            var formatOpts = self.getProperty('dateFormatAxis') || 'HH:mm:ss';
-	                            console.log('formatOpts ', formatOpts);
+	                            //console.log('formatOpts ', formatOpts);
 	                            return moment(this.value).format(formatOpts);
 	                        },
 	                        rotation: parseInt(this.getProperty('xAngle'), 10) || 0,
@@ -273,7 +271,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    backgroundColor: 'rgba(0,0,0,0.7)',
 	                    formatter: function formatter() {
 	                        var formatOpts = self.getProperty('dateFormatTooltip') || 'HH:mm:ss';
-	                        console.log('formatOpts ', formatOpts);
+	                        //console.log('formatOpts ', formatOpts);
 	                        return '<strong>Time:</strong>: ' + moment(this.x).format(formatOpts) + '<br>\n                            <strong>' + this.series.name + '</strong>: ' + this.y;
 	                    },
 	                    borderRadius: 5,
@@ -286,10 +284,71 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    followTouchMove: false
 	                },
 	                series: data.series
-	            });
+				});
+				
+				let id =  '#' + this.uniqueId;
+				$(id).css('position', 'relative');
+				
+				var button = document.createElement('div');
+				button.setAttribute('id', 'btn-full-screen-chart');
+				button.innerHTML = '&#128269;';
 
-	            console.timeEnd('updateView');
-	        },
+				$(id).append(button);
+
+				button.addEventListener('click', (event) => { this.toggleFullScreen(); });
+
+	            //console.timeEnd('updateView');
+			},
+			
+			fullScreen: function() {
+				if(document.mozFullScreen || document.webkitIsFullScreen || window.innerHeight == screen.height) {
+					if (document.cancelFullScreen) {
+						document.cancelFullScreen();
+						return;
+					} else if (document.mozCancelFullScreen) {
+						document.mozCancelFullScreen();
+						return;
+					} else if (document.webkitCancelFullScreen) {
+						document.webkitCancelFullScreen();
+						return;
+					}
+				};
+				
+				var elem = document.getElementById(this.uniqueId);
+	
+				if (elem.requestFullscreen) {
+					elem.requestFullscreen();
+				} else if (elem.mozRequestFullScreen) {
+					elem.mozRequestFullScreen();
+				} else if (elem.webkitRequestFullscreen) {
+					elem.webkitRequestFullscreen();
+				} else if (elem.msRequestFullscreen) {
+					elem.msRequestFullscreen();
+				}
+			},
+
+			toggleFullScreen: function() {
+				console.log('FullScreen');
+				var elem = document.getElementById(this.uniqueId);
+				if (!document.fullscreenElement &&    // alternative standard method
+						!document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+					if (elem.requestFullscreen) {
+						elem.requestFullscreen();
+					} else if (elem.mozRequestFullScreen) {
+						elem.mozRequestFullScreen();
+					} else if (elem.webkitRequestFullscreen) {
+						elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+					}
+				} else {
+					if (document.cancelFullScreen) {
+						document.cancelFullScreen();
+					} else if (document.mozCancelFullScreen) {
+						document.mozCancelFullScreen();
+					} else if (document.webkitCancelFullScreen) {
+						document.webkitCancelFullScreen();
+					}
+				}
+			},
 
 	        // Search data params
 	        getInitialDataParams: function getInitialDataParams() {
