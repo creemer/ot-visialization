@@ -75,6 +75,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        // Optionally implement to format data returned from search.
 	        // The returned object will be passed to updateView as 'data'
 	        formatData: function formatData(data) {
+				console.log("FormatData data input", data)
 	            var _this = this;
 
 	            if (data.results.length < 1) {
@@ -133,7 +134,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    }
 	                }
 				});
-				
+				console.log("FormatData series output", series);
 	            return { series: series };
 	        },
 	        drilldownLabel: function drilldownLabel(event) {
@@ -152,7 +153,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        //  'config' will be the configuration property object
 	        updateView: function updateView(data, config) {
 	            var _this2 = this;
-
+				console.log('UpadateView data input', data);
 	            var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
 	            //console.log('severalAxis: ', severalAxis, this.getProperty('severalYAxis'));
 
@@ -28088,7 +28089,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        H.wrap(H.Series.prototype, 'setData', function (proceed) {
 	            var opt = this.options;
 	            if (opt.hasOwnProperty('downsample')) {
-
+					console.log('ARGUMENTS', arguments);
+					console.log('This', this);
+					console.log('This.options', this.options);
 	                if (Array.isArray(arguments[1][0]) && arguments[1][0].length == 2) {
 	                    // Data is array of arrays with two values
 	                    arguments[1] = largestTriangleThreeBuckets(arguments[1], opt.downsample.threshold);
@@ -28108,7 +28111,8 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            }
 	            proceed.apply(this, Array.prototype.slice.call(arguments, 1));
 	        });
-	    } });
+		} 
+	});
 
 /***/ })
 /******/ ])});;
