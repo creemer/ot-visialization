@@ -1,53 +1,30 @@
 <form class="splunk-formatter-section" section-label="Формат даты">
-    <splunk-control-group label='Формат даты для оси X'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.dateFormatAxis"></splunk-text-input>
+    <splunk-control-group label='Формат даты'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.dateFormatAxis" value="DD-MM-YYYY"></splunk-text-input>
     </splunk-control-group>
-    <splunk-control-group label='Формат даты для всплывающего окна'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.dateFormatTooltip"></splunk-text-input>
-    </splunk-control-group>
-</form>
 <form class="splunk-formatter-section" section-label="Внешний вид">
-    <splunk-control-group label='Название оси Y'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.yAxisName"></splunk-text-input>
-    </splunk-control-group>
-    <splunk-control-group label='Расстояние по оси X'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.tickInterval" value="50"></splunk-text-input>
-    </splunk-control-group>
-    <splunk-control-group label='Угол наклона названия по оси X'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.xAngle" value="45"></splunk-text-input>
-    </splunk-control-group>
-    <splunk-control-group label='Показывать точки'>
-        <splunk-radio-input name="{{VIZ_NAMESPACE}}.showMarkers" value="false">
-            <option value="true">Да</option>
-            <option value="false">Нет</option>
-        </splunk-radio-input>
-    </splunk-control-group>
-    <splunk-control-group label='Показывать легенду'>
+    <!-- <splunk-control-group label='Показывать легенду'>
         <splunk-radio-input name="{{VIZ_NAMESPACE}}.showLegend" value="false">
             <option value="true">Да</option>
             <option value="false">Нет</option>
         </splunk-radio-input>
+    </splunk-control-group> -->
+    <splunk-control-group label='Показывать ScrollBar'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.showScrollBar" value="false">
+            <option value="true">Да</option>
+            <option value="false">Нет</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+    <splunk-control-group label='Цвет линии'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.lineColor" value="#aa00aa"></splunk-text-input>
     </splunk-control-group>
 </form>
 <form class="splunk-formatter-section" section-label="Поведение">
-    <splunk-control-group label='Показывать точки'>
+    <splunk-control-group label='Отображение гепов'>
         <splunk-select name="{{VIZ_NAMESPACE}}.gapeMode" value="blank">
             <option value="blank">Оставлять пробелы</option>
-            <option value="zeroes">Заполнять нулями</option>
             <option value="connect">Соединять точки</option>
         </splunk-select>
-    </splunk-control-group>
-    <splunk-control-group label='Поддержка нескольких осей Y'>
-        <splunk-radio-input name="{{VIZ_NAMESPACE}}.severalYAxis" value="false">
-            <option value="true">Да</option>
-            <option value="false">Нет</option>
-        </splunk-radio-input>
-    </splunk-control-group>
-    <splunk-control-group label='Нужна сортировка'>
-        <splunk-radio-input name="{{VIZ_NAMESPACE}}.needSort" value="false">
-            <option value="true">Да</option>
-            <option value="false">Нет</option>
-        </splunk-radio-input>
     </splunk-control-group>
     <splunk-control-group label='Downsample'>
         <splunk-radio-input name="{{VIZ_NAMESPACE}}.needDownsample" value="false">
@@ -55,12 +32,11 @@
             <option value="false">Нет</option>
         </splunk-radio-input>
     </splunk-control-group>
-</form>
-<form class="splunk-formatter-section" section-label="Масштабирование">
-    <splunk-control-group label='Минимальное значение по Y'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.minY"></splunk-text-input>
+    <splunk-control-group label='Точное колличество точек'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.downsampleDots" value="0"></splunk-text-input>
     </splunk-control-group>
-    <splunk-control-group label='Максимальное значение по Y'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.maxY"></splunk-text-input>
+    <splunk-control-group label='Колличество точек в %'>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.downsampleDotsPercents" value="10"></splunk-text-input>
     </splunk-control-group>
 </form>
+

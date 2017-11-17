@@ -395,6 +395,19 @@
   height: 300px;
 }
 
+.gantt-wrapper:-moz-full-screen::backdrop {
+  background-color: #fff;
+}
+.gantt-wrapper:fullscreen::backdrop {
+	background-color: #fff;
+}
+.gantt-wrapper:-ms-fullscreen::-ms-backdrop {
+	background-color: #fff;
+}
+.gantt-wrapper:-webkit-full-screen::backdrop {
+	background-color: #fff;
+}
+
 .amcharts-export-menu, .export-main {
 	display: none !important;
 }

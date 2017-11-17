@@ -22,3 +22,16 @@
     background: rgba(206, 205, 205, 0.5);
 }
 
+.highcharts-wrapper:-moz-full-screen::backdrop {
+    background-color: #fff;
+  }
+  .highcharts-wrapper:fullscreen::backdrop {
+      background-color: #fff;
+  }
+  .highcharts-wrapper:-ms-fullscreen::-ms-backdrop {
+      background-color: #fff;
+  }
+  .highcharts-wrapper:-webkit-full-screen::backdrop {
+      background-color: #fff;
+  }
+

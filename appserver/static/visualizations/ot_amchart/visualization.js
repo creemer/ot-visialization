@@ -83,7 +83,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     this.$el = $(this.el);
     
                     this.uniqueId = 'ot-chart-' + Math.ceil(Math.random() * 100000000);
-                    this.$el.append('<div id="' + this.uniqueId + '"></div>');
+                    this.$el.append('<div id="' + this.uniqueId + '" class="amchart-line-wrapper"></div>');
                     // Initialization logic goes here
                 },
     
@@ -92,6 +92,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                 formatData: function (data) {
                     var _this = this;
                     let needDownsample = this.getProperty('needDownsample') === 'true';
+                    let downsampleDots = parseInt(this.getProperty('downsampleDots'), 10) || 0;
+                    let downsampleDotsPercents = parseInt(this.getProperty('downsampleDotsPercents'), 10) || 10;
+                    let dateFormatAxis = this.getProperty('dateFormatAxis') || 'DD-MM-YYYY'
 
                     console.log('Begin date formatting');
                     console.log('formatData data: ', data);
@@ -104,6 +107,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     var rows = data.rows;
 
                     if(needDownsample) {
+                        if(!downsampleDots) {
+                            downsampleDots = (rows.length / 100) * downsampleDotsPercents
+                        }
+
                         if (Array.isArray(rows[0]) && rows[0].length == 2) {
                             // Data is array of arrays with two values
                             rows = this.downSample(rows, 150);
@@ -133,12 +140,12 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
                             } // end for
 
-                            var dowsampled = this.downSample(rows, 100);
+                            var dowsampled = this.downSample(rows, downsampleDots);
                             console.log('Downsampled', dowsampled);
 
                             dowsampled.map( item => {
                                 series.push({
-                                    date: moment(item[0]).format('DD-MM-YYYY'),
+                                    date: moment(item[0]).format(dateFormatAxis),
                                     value: item[1],
                                 })
                             })
@@ -149,7 +156,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                    
                     data.rows.map( (row) => { 
                         series.push({
-                            date: moment(row[0]).format('DD-MM-YYYY'),
+                            date: moment(row[0]).format(dateFormatAxis),
                             value: row[1],
                         })
                     });
@@ -182,6 +189,11 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     console.log('UpdatView data: ', data);
                     const id = '#' + this.uniqueId;
 
+                    let showLegend = this.getProperty('showLegend') === 'true' || false;
+                    let showScrollBar = this.getProperty('showScrollBar') === 'true';
+                    let gapeMode = this.getProperty('gapeMode') === 'connect' ? true : false;
+                    let lineColor = this.getProperty('lineColor') || '#00a'
+
                     var containerHeight = this.$el.closest('.viz-controller').height();
                     this.$el.find(id).css({
                         height: containerHeight - 30 + 'px'
@@ -202,7 +214,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                         "mouseWheelZoomEnabled": true,
                         "graphs": [{
                             "id": "g1",
-                            "balloonText": "[[value]]",
+                            "balloonText": "[[date]] - [[value]]",
                             "bullet": "round",
                             "bulletBorderAlpha": 1,
                             "bulletColor": "#FFFFFF",
@@ -211,14 +223,14 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                             "valueField": "value",
                             "useLineColorForBulletBorder": true,
                             "lineThickness": 2.5,
-                            "balloon":{
-                                "drop":true
-                            }
+                            "lineColor": lineColor[0] === '#' ? lineColor : '#' + lineColor,
+                            "connect": gapeMode,
                         }],
                         "chartScrollbar": {
                             "autoGridCount": true,
                             "graph": "g1",
-                            "scrollbarHeight": 40
+                            "scrollbarHeight": 40,
+                            "enabled": showScrollBar,
                         },
                         "chartCursor": {
                            "limitToGraph":"g1"
@@ -230,6 +242,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                             "dashLength": 1,
                             "minorGridEnabled": false
                         },
+                        "legend": {
+                            "enabled": false,
+                        },
                         "export": {
                             "enabled": true
                         }
@@ -237,52 +252,16 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
                     chart.addListener("rendered", () => {
                         chart.zoomToIndexes(chart.dataProvider.length - 40, chart.dataProvider.length - 1);
-                    });
-
-                    // var chart = AmCharts.makeChart(this.uniqueId, {
-                    //     "type": "serial",
-                    //     "categoryField": "date",
-                    //     "dataDateFormat": "YYYY-MM-DD",
-                    //     "mouseWheelZoomEnabled": true,
-                    //     "graphs": [{
-                    //         "id": "g1",
-                    //         "balloonText": "[[value]]",
-                    //         "bullet": "round",
-                    //         "bulletBorderAlpha": 1,
-                    //         "bulletColor": "#FFFFFF",
-                    //         "hideBulletsCount": 50,
-                    //         "title": "red line",
-                    //         "valueField": "value",
-                    //         "useLineColorForBulletBorder": true,
-                    //         "balloon":{
-                    //             "drop":true
-                    //         }
-                    //     }],
-                    //     "chartScrollbar": {
-                    //         "autoGridCount": true,
-                    //         "graph": "g1",
-                    //         "scrollbarHeight": 40
-                    //     },
-                    //     "categoryAxis": {
-                    //         "parseDates": false,
-                    //         "axisColor": "#DADADA",
-                    //         "dashLength": 1,
-                    //         "minorGridEnabled": true
-                    //     },
-                    //     "dataProvider": data,
-                    //     "export": {
-                    //         "enabled": true
-                    //     }
-                    // });                
+                    });                
                       
                     $(id).css('position', 'relative');
                     var button = document.createElement('div');
-                    button.setAttribute('id', 'btn-full-screen-gantt');
+                    button.setAttribute('id', 'btn-full-screen-amchart');
                     button.innerHTML = '&#128269;';
     
                     $(id).append(button);
     
-                    button.addEventListener('click', (event) => { this.fullScreen(event, 'Gantt-'); })
+                    button.addEventListener('click', (event) => { this.toggleFullScreen(); })
     
                 }, // End UpdateView
     
@@ -294,30 +273,31 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     });
                 },
                 
-                fullScreen: function(event, idLooksLike) {
-                    if(document.mozFullScreen || document.webkitIsFullScreen || window.innerHeight == screen.height) {
+                toggleFullScreen: function() {
+                    console.log('FullScreen');
+                    var elem = document.getElementById(this.uniqueId);
+                    if (!document.fullscreenElement &&    // alternative standard method
+                            !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+                        if (elem.requestFullscreen) {
+                            elem.requestFullscreen();
+                        } else if (elem.mozRequestFullScreen) {
+                            elem.mozRequestFullScreen();
+                        } else if (elem.webkitRequestFullscreen) {
+                            elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                        } else if (elem.msRequestFullscreen) {
+                            elem.msRequestFullscreen();
+                        }
+                    } else {
                         if (document.cancelFullScreen) {
                             document.cancelFullScreen();
-                            return;
                         } else if (document.mozCancelFullScreen) {
                             document.mozCancelFullScreen();
-                            return;
                         } else if (document.webkitCancelFullScreen) {
                             document.webkitCancelFullScreen();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
                             return;
                         }
-                    };
-    
-                    var elem = document.getElementById(this.uniqViewNum);
-        
-                    if (elem.requestFullscreen) {
-                        elem.requestFullscreen();
-                    } else if (elem.mozRequestFullScreen) {
-                        elem.mozRequestFullScreen();
-                    } else if (elem.webkitRequestFullscreen) {
-                        elem.webkitRequestFullscreen();
-                    } else if (elem.msRequestFullscreen) {
-                        elem.msRequestFullscreen();
                     }
                 },
 

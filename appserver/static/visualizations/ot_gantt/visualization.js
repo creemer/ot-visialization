@@ -417,7 +417,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
 				$(id).append(button);
 
-				button.addEventListener('click', (event) => { this.fullScreen(event, 'Gantt-'); })
+				button.addEventListener('click', (event) => { this.toggleFullScreen(); })
 
 	        }, // End UpdateView
 
@@ -431,13 +431,19 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 			
 			fullScreen: function(event, idLooksLike) {
 				if(document.mozFullScreen || document.webkitIsFullScreen || window.innerHeight == screen.height) {
-					if (document.cancelFullScreen) {
-						document.cancelFullScreen();
+					if (document.exitFullscreen) {
+						document.exitFullscreen();
 						return;
-					} else if (document.mozCancelFullScreen) {
+					}
+					else if (document.msExitFullscreen) {
+						document.msExitFullscreen();
+						return;
+					}
+					else if (document.mozCancelFullScreen) {
 						document.mozCancelFullScreen();
 						return;
-					} else if (document.webkitCancelFullScreen) {
+					}
+					else if (document.webkitCancelFullScreen) {
 						document.webkitCancelFullScreen();
 						return;
 					}
@@ -453,6 +459,34 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 					elem.webkitRequestFullscreen();
 				} else if (elem.msRequestFullscreen) {
 					elem.msRequestFullscreen();
+				}
+			},
+
+			toggleFullScreen: function() {
+				console.log('FullScreen');
+				var elem = document.getElementById(this.uniqViewNum);
+				if (!document.fullscreenElement &&    // alternative standard method
+						!document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+					if (elem.requestFullscreen) {
+						elem.requestFullscreen();
+					} else if (elem.mozRequestFullScreen) {
+						elem.mozRequestFullScreen();
+					} else if (elem.webkitRequestFullscreen) {
+						elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+					} else if (elem.msRequestFullscreen) {
+						elem.msRequestFullscreen();
+					}
+				} else {
+					if (document.cancelFullScreen) {
+						document.cancelFullScreen();
+					} else if (document.mozCancelFullScreen) {
+						document.mozCancelFullScreen();
+					} else if (document.webkitCancelFullScreen) {
+						document.webkitCancelFullScreen();
+					} else if (document.msExitFullscreen) {
+						document.msExitFullscreen();
+						return;
+					}
 				}
 			},
 
