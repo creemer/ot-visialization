@@ -202,7 +202,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	        // Optionally implement to format data returned from search. 
 	        // The returned object will be passed to updateView as 'data'
 	        formatData: function(data, config) {
-	            var rows = data.rows;
+				var rows = data.rows;
+
+				//console.log('From format rows', rows);
 
 	            this.startDate = moment().subtract(0, 'hours');
 	            if(rows.length < 1){
@@ -247,10 +249,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            });
 	            var retCategories = categories.sort(function(val1, val2) {
 	            	if (val1.idx !== -1 && val2.idx !== -1) {
-	            		console.log('IDX');
+	            		//console.log('IDX');
 		            	return val1.idx < val2.idx ? -1 : 1;
 	            	} else {
-	            		console.log('CATEGORY');
+	            		//console.log('CATEGORY');
 		            	return val1.category < val2.category ? -1 : 1
 	            	}
 	            });
@@ -410,6 +412,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                }]
 				});
 				
+				// создаём кнопку развертывания на весь экран
 				$(id).css('position', 'relative');
 				var button = document.createElement('div');
 				button.setAttribute('id', 'btn-full-screen-gantt');
@@ -428,8 +431,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                count: 10000
 	            });
 			},
-			
-			fullScreen: function(event, idLooksLike) {
+			/**
+			 * Аналог метода toggleFullScreen() 
+			 */
+			fullScreen: function() {
 				if(document.mozFullScreen || document.webkitIsFullScreen || window.innerHeight == screen.height) {
 					if (document.exitFullscreen) {
 						document.exitFullscreen();

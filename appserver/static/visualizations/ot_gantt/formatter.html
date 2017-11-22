@@ -63,3 +63,11 @@
         <splunk-text-input name="{{VIZ_NAMESPACE}}.ganttHeight"></splunk-text-input>
     </splunk-control-group>
 </form>
+<form class="splunk-formatter-section" section-label="Downsample">
+    <splunk-control-group label='Прореживание'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.needDownsample" value="false">
+            <option value="true">Вкл</option>
+            <option value="false">Выкл</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+</form>

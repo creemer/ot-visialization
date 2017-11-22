@@ -106,46 +106,55 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     var series = [];
                     var rows = data.rows;
 
-                    if(needDownsample) {
-                        if(!downsampleDots) {
+                    if(needDownsample) { // if need downsample chart - goes here
+                        if(!downsampleDots) { // check dots setted
                             downsampleDots = (rows.length / 100) * downsampleDotsPercents
                         }
 
                         if (Array.isArray(rows[0]) && rows[0].length == 2) {
-                            // Data is array of arrays with two values
+                            // Data is array of arrays with two values, then start downsample
                             rows = this.downSample(rows, 150);
-                            return rows.forEach( row => {
-                                return {
-                                    date: row[0],
-                                    value: row[1],
-                                }
+                            
+                            //transform array of arrays to array of objects
+                            rows.map( row => {
+                                series.push({
+                                    date: moment(row[0]).format(dateFormatAxis), // modify data to needed format
+                                    value: row[1]
+                                })
                             })
+
+                            return series;
+
                         } else {
                             for(let i = 0, len = rows.length; i < len; i++) {
                                 let row = rows[i];
-
+                                
+                                //delete not needed values, by poping it.
                                 if (row.length > 2) {
                                     while(row.length > 2) {
                                         row.pop();    
                                     }
                                 };
 
+                                //check for null values 
                                 if(row[1] == null) { 
                                     row[1] = '0' 
                                 };
 
+                                //check for correct date format. must be date! (not string)
                                 if(isNaN(row[0] * 1)) { 
                                     row[0] = new Date(row[0]).getTime(); 
                                 };
 
                             } // end for
 
-                            var dowsampled = this.downSample(rows, downsampleDots);
+                            var dowsampled = this.downSample(rows, downsampleDots); // modify data to needed format
                             console.log('Downsampled', dowsampled);
 
+                            //transform array of arrays to array of objects
                             dowsampled.map( item => {
                                 series.push({
-                                    date: moment(item[0]).format(dateFormatAxis),
+                                    date: moment(item[0]).format(dateFormatAxis), // modify data to needed format
                                     value: item[1],
                                 })
                             })
@@ -154,6 +163,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                         }
                     } // end if   
                    
+                    //make arrays of objects
                     data.rows.map( (row) => { 
                         series.push({
                             date: moment(row[0]).format(dateFormatAxis),
@@ -194,6 +204,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     let gapeMode = this.getProperty('gapeMode') === 'connect' ? true : false;
                     let lineColor = this.getProperty('lineColor') || '#00a'
 
+                    // выставляем высоту сразу - иначе график плывёт.
                     var containerHeight = this.$el.closest('.viz-controller').height();
                     this.$el.find(id).css({
                         height: containerHeight - 30 + 'px'
@@ -253,14 +264,16 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     chart.addListener("rendered", () => {
                         chart.zoomToIndexes(chart.dataProvider.length - 40, chart.dataProvider.length - 1);
                     });                
-                      
+                    
+                    //добавяем кнопку разворота на весь экран
                     $(id).css('position', 'relative');
                     var button = document.createElement('div');
                     button.setAttribute('id', 'btn-full-screen-amchart');
                     button.innerHTML = '&#128269;';
     
                     $(id).append(button);
-    
+                    
+                    //event listener
                     button.addEventListener('click', (event) => { this.toggleFullScreen(); })
     
                 }, // End UpdateView
@@ -273,6 +286,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     });
                 },
                 
+                // кроссбраузерная функция открытия и сворачивания на весь экран.
                 toggleFullScreen: function() {
                     console.log('FullScreen');
                     var elem = document.getElementById(this.uniqueId);
@@ -301,6 +315,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
                     }
                 },
 
+                // алгоритм downsample. from MIT
                 downSample: function(data, threshold) {
                     
                     var data_length = data.length;

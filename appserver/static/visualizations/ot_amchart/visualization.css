@@ -397,14 +397,17 @@
 }
 
 .amchart-line-wrapper:-moz-full-screen::backdrop {
-    background-color: #fff;
-  }
-  .amchart-line-wrapper:fullscreen::backdrop {
-      background-color: #fff;
-  }
-  .amchart-line-wrapper:-ms-fullscreen::-ms-backdrop {
-      background-color: #fff;
-  }
-  .amchart-line-wrapper:-webkit-full-screen::backdrop {
-    background-color: #fff;
-  }
+	background-color: #fff;
+}
+
+.amchart-line-wrapper:fullscreen::backdrop {
+	background-color: #fff;	
+}
+
+.amchart-line-wrapper:-ms-fullscreen::-ms-backdrop {
+	background-color: #fff;	
+}
+
+.amchart-line-wrapper:-webkit-full-screen::backdrop {
+	background-color: #fff;
+}
