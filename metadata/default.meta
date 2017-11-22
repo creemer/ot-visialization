@@ -45,3 +45,13 @@ export = system
 
 [visualizations/ot_amchart]
 export = system
+
+[visualizations/ot_fast_chart]
+export = system
+
+[commands/svg]
+access = read : [ * ], write : [ * ]
+export = system
+owner = nobody
+version = 6.6.3
+modtime = 1473074621.834392000

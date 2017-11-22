@@ -1,3 +1,10 @@
 [app/install/install_source_checksum]
 version = 7.0.0
 modtime = 1510663225.330741000
+
+[commands/svg]
+access = read : [ * ], write : [ * ]
+export = system
+owner = nobody
+version = 6.6.3
+modtime = 1473074621.834392000
