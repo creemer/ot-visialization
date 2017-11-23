@@ -35,3 +35,10 @@
       background-color: #fff;
   }
 
+.highcharts-wrapper:-webkit-full-screen {
+    width: 100%;
+}
+
+.highcharts-wrapper {
+    height: 100%;
+}

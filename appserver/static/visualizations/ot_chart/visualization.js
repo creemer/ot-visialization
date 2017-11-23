@@ -76,12 +76,15 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        // The returned object will be passed to updateView as 'data'
 	        formatData: function formatData(data) {
 				console.log("FormatData data input", data)
+				
 	            var _this = this;
-
+				
 	            if (data.results.length < 1) {
-	                return false;
+					return false;
 	            }
-
+				
+				var needDownsample = this.getProperty('needDownsample') === 'true';
+				
 	            //return datum;
 	            var timeField = 0;
 	            var otherFields = [];
@@ -97,7 +100,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            otherFields.forEach(function (curVal, idx) {
 	                return series.push({
 	                    downsample: {
-	                        threshold: parseInt(_this.getProperty('downSampled'), 10) || 0
+	                        threshold: needDownsample ? parseInt(_this.getProperty('downsampleDots'), 10) : 0
 	                    },
 	                    yAxis: severalAxis && numAxis < 2 ? numAxis++ : 0,
 	                    name: curVal,
@@ -173,7 +176,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            var containerHeight = this.$el.closest('.viz-controller').height();
 	            this.$el.find('#' + this.uniqueId).css({
 	                height: containerHeight - 30 + 'px'
-	            });
+				});
 
 	            var self = this;
 	            var yAxisName = this.getProperty('yAxisName') || '';
@@ -304,6 +307,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 			toggleFullScreen: function() {
 				console.log('FullScreen');
 				var elem = document.getElementById(this.uniqueId);
+				elem.style.height = '100%';
 				if (!document.fullscreenElement &&    // alternative standard method
 						!document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
 					if (elem.requestFullscreen) {

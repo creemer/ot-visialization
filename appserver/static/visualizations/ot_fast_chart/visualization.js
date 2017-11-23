@@ -78,7 +78,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        formatData: function(data) {
 
 				// Format data 
-				console.log('Intro data in format', data);
+				//console.log('Intro data in format', data);
 				var url = data.rows[0];
 
 	            return url;
@@ -122,14 +122,18 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 					let titles = element.querySelectorAll('.axis.x > .guides > title');
 					
 					for(let i = 0, len = times.length; i < len; i++) {
-						if(i % dateDownsample == 0 || i == 0 || i == len - 1) {
-							let time = new Date(+titles[i].innerHTML * 1000);
-							// console.log('time', time);
-							titles[i].innerHTML = time;
-							times[i].innerHTML = time.getHours() +'-'+ time.getMinutes();
-							continue;
-						}
-						times[i].style = 'display: none';
+						// if(i % dateDownsample == 0 || i == 0 || i == len - 1) {
+						// 	let time = new Date(+titles[i].innerHTML * 1000);
+						// 	// console.log('time', time);
+						// 	titles[i].innerHTML = time;
+						// 	times[i].innerHTML = time.getHours() +'-'+ time.getMinutes();
+						// 	continue;
+						// }
+						// times[i].style = 'display: none';
+						let time = new Date(+titles[i].innerHTML * 1000);
+						// console.log('time', time);
+						titles[i].innerHTML = time;
+						times[i].innerHTML = time.getHours() +'-'+ time.getMinutes();
 					}
 					
 					try {
@@ -139,7 +143,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 					}
 
 					clearTimeout(timer);
-				},10)				
+				},10) // end timeout				
 				
 			},
 			addTooltip: function() {

@@ -77,9 +77,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            SplunkVisualizationBase.prototype.initialize.apply(this, arguments);
 	            this.$el = $(this.el);
 
-	            this.uniqViewNum = 'Gantt-' + Math.ceil(Math.random() * 10000);
+	            this.uniqueId = 'Gantt-' + Math.ceil(Math.random() * 10000);
 
-	            this.$el.append('<div id="' + this.uniqViewNum + '" class="gantt-wrapper"></div>');
+	            this.$el.append('<div id="' + this.uniqueId + '" class="gantt-wrapper"></div>');
 				this.initedCats = false;
 				
 				this.ganttHeight = '70';
@@ -297,10 +297,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 				var visibilityAxisLabels = this.getProperty('visibilityAxisLabels') === 'true';
 				var minHeight = '32';
 
-				// console.log('--------------------');
-				// console.log('config', config);
-				// console.log('--------------------');
-				
+				/**
+				 * Возможность задаывть высоту руками. 
+				 * Сейчас рвботает как резиновая.
+ 
 				if(visibilityAxisLabels) {
 					minHeight = '52';
 				};
@@ -317,19 +317,24 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 				};
 				
 				// задаём высоту ганту по id - контейнеру графика.
-				var id = '#' + this.uniqViewNum;
+				var id = '#' + this.uniqueId;
 	        	if (ganttHeight > 0) {
 	        		$(id).css({
 	        			height: ganttHeight
 	        		})
-				};
+				}; 
+				*/
+				
+				var id = '#' + this.uniqueId;
+				document.querySelector(id).style.height = '100%';
+
 
 	            var durationName = this.getProperty('duration');
 	            var categoryName = this.getProperty('category');
 	            var state = this.getProperty('state');
 
-	            $('#' + this.uniqViewNum).empty();
-	            $('#' + this.uniqViewNum).append('<span>Not implemented yet.</span>');
+	            $('#' + this.uniqueId).empty();
+	            $('#' + this.uniqueId).append('<span>Not implemented yet.</span>');
 	            var self = this;
 
 	            var legend = [];
@@ -341,7 +346,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                });
 				}
 
-	            var chart = AmCharts.makeChart(this.uniqViewNum, {
+	            var chart = AmCharts.makeChart(this.uniqueId, {
 	                "type": "gantt",
 	                "theme": "light",
 	                "marginRight": 40,
@@ -454,7 +459,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 					}
 				};
 
-				var elem = document.getElementById(this.uniqViewNum);
+				var elem = document.getElementById(this.uniqueId);
 	
 				if (elem.requestFullscreen) {
 					elem.requestFullscreen();
@@ -469,7 +474,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
 			toggleFullScreen: function() {
 				console.log('FullScreen');
-				var elem = document.getElementById(this.uniqViewNum);
+				var elem = document.getElementById(this.uniqueId);
 				if (!document.fullscreenElement &&    // alternative standard method
 						!document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
 					if (elem.requestFullscreen) {

@@ -3,10 +3,11 @@
  * Class namespacing is good practice.
  */
 
-.dots {
+/* .dots {
     display: none;
-}
+} */
 
 .color-0 {
     stroke-width: 2;
 }
+
