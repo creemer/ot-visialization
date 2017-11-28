@@ -52,12 +52,12 @@
     <splunk-control-group label='Нужно прореживание'>
         <splunk-radio-input name="{{VIZ_NAMESPACE}}.needDownsample" value="false">
             <option value="true">Да</option>
-            <option value="$needDownsample$">O</option>
+            <option value="$needDownsampleDash$">O</option>
             <option value="false">Нет</option>
         </splunk-radio-input>
     </splunk-control-group>
     <splunk-control-group label='Колличество точек'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.downsampleDots" value="20"></splunk-text-input>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.downsampleDots" value="$downsampleDotsDash$"></splunk-text-input>
     </splunk-control-group>
 </form>
 <form class="splunk-formatter-section" section-label="Масштабирование">
