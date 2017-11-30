@@ -42,3 +42,7 @@
 .highcharts-wrapper {
     height: 100%;
 }
+
+splunk-color-picker {
+    display: inline-block;
+}

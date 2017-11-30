@@ -158,7 +158,14 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        updateView: function updateView(data, config) {
 	            var _this2 = this;
 				//console.log('UpadateView data input', data);
-	            var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
+				var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
+				var colors = [
+					this.getProperty('color1'), 
+					this.getProperty('color2'), 
+					this.getProperty('color3'), 
+					this.getProperty('color4')
+				];
+
 
 	            this.$el.find('#' + this.uniqueId).empty();
 
@@ -196,8 +203,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                        }
 	                    }
 	                },
-	                colors: ['#237eb2', '#fbb902', '#d64848', '#07912c', '#903030', '#46c35b', '#4a1d6f', '#f60328', '#2d9c89'],
-	                credits: {
+	                //colors: ['#237eb2', '#fbb902', '#d64848', '#07912c', '#903030', '#46c35b', '#4a1d6f', '#f60328', '#2d9c89'],
+					colors: colors,
+					credits: {
 	                    enabled: false
 	                },
 	                title: {
