@@ -160,6 +160,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        updateView: function updateView(data, config) {
 				var _this2 = this;
 				
+				if (!data.series) {
+					return;
+				}
 				console.log('UpadateView data input', data);
 
 				var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
@@ -170,11 +173,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 					this.getProperty('color4')
 				];
 
-	            this.$el.find('#' + this.uniqueId).empty();
-
-	            if (!data.series) {
-	                return;
-	            }
+				this.$el.find('#' + this.uniqueId).empty();
+				
+				var legendPosition = this.getProperty('legendPosition');
+				var legendAlign = this.getProperty('legendAlign');
 
 	            var containerHeight = this.$el.closest('.viz-controller').height();
 	            this.$el.find('#' + this.uniqueId).css({
@@ -191,7 +193,11 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                },
 	                legend: {
 						enabled: this.getProperty('showLegend') === 'true',
-						margin: 0
+						margin: 0,
+						// если легенда снизу или сверху, расположение записей только горизонтально
+						layout: legendPosition === 'bottom' || legendPosition === 'top' ? 'horizontal' : 'vertical',
+						align: legendAlign,
+						verticalAlign: legendPosition
 					},
 	                plotOptions: {
 	                    line: {
