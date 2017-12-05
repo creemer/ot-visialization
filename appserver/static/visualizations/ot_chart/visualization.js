@@ -105,7 +105,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    },
 	                    yAxis: severalAxis && numAxis < 2 ? numAxis++ : 0,
 	                    name: curVal,
-	                    type: graphType === 'line' ? 'line' : 'area',
+	                    type: graphType, //=== 'line' ? 'line' : 'area',
 	                    data: [],
 	                    tooltip: {}
 	                });
@@ -123,6 +123,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                for (var i = 0, len = otherFields.length; i < len; ++i) {
 	                    var yVal = curResult[otherFields[i]];
 						var timestamp = new Date(curResult._time).getTime();
+						
 	                    if (yVal) {
 	                        series[i].data.push([timestamp, parseFloat(yVal)]);
 	                        continue;
@@ -158,7 +159,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        //  'data' will be the data object returned from formatData or from the search
 	        //  'config' will be the configuration property object
 	        updateView: function updateView(data, config) {
-				var _this2 = this;
+				var self = this;
 				
 				if (!data.series) {
 					return;
@@ -177,6 +178,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				
 				var legendPosition = this.getProperty('legendPosition');
 				var legendAlign = this.getProperty('legendAlign');
+				var xAxisFontSize = this.getProperty('xAxisFontSize') + 'px';
 
 	            var containerHeight = this.$el.closest('.viz-controller').height();
 	            this.$el.find('#' + this.uniqueId).css({
@@ -239,7 +241,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                            return moment(this.value).format(formatOpts);
 	                        },
 	                        rotation: parseInt(this.getProperty('xAngle'), 10) || 0,
-	                        align: 'left'
+							align: 'left',
+							style: {
+								fontSize: xAxisFontSize
+							}
 	                    },
 	                    crosshair: false
 	                }],
@@ -315,7 +320,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 
 				$(id).append(button);
 
-				button.addEventListener('click', (event) => { this.toggleFullScreen(); });
+				button.addEventListener('click', function(event) { self.toggleFullScreen(); });
 
 	            //console.timeEnd('updateView');
 			},

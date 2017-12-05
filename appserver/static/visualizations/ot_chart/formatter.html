@@ -2,6 +2,16 @@
     <splunk-control-group label='Формат даты для оси X'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.dateFormatAxis"></splunk-text-input>
     </splunk-control-group>
+    <splunk-control-group label='Размер шрифта даты'>
+        <splunk-select name="{{VIZ_NAMESPACE}}.xAxisFontSize" value="12">
+            <option value="5">5px</option>
+            <option value="8">8px</option>
+            <option value="12">12px</option>
+            <option value="15">15px</option>
+            <option value="18">18px</option>
+            <option value="21">21px</option>
+        </splunk-select>
+    </splunk-control-group>
     <splunk-control-group label='Формат даты для всплывающего окна'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.dateFormatTooltip"></splunk-text-input>
     </splunk-control-group>

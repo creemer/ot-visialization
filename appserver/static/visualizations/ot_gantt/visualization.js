@@ -290,6 +290,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	        //  'data' will be the data object returned from formatData or from the search
 	        //  'config' will be the configuration property object
 	        updateView: function(categories, config) {
+				var self = this;
 
 				var ganttHeight = this.ganttHeight;
 				var visibilityScrollBar = this.getProperty('visibilityScrollBar') === 'true';
@@ -335,7 +336,6 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
 	            $('#' + this.uniqueId).empty();
 	            $('#' + this.uniqueId).append('<span>Not implemented yet.</span>');
-	            var self = this;
 
 	            var legend = [];
 
@@ -425,7 +425,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
 				$(id).append(button);
 
-				button.addEventListener('click', (event) => { this.toggleFullScreen(); })
+				button.addEventListener('click', function(event) { self.toggleFullScreen(); })
 
 	        }, // End UpdateView
 
