@@ -1,17 +1,23 @@
-<form class="splunk-formatter-section" section-label="Формат даты">
+<form class="splunk-formatter-section" section-label="Формат">
     <splunk-control-group label='Формат даты для оси X'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.dateFormatAxis"></splunk-text-input>
     </splunk-control-group>
     <splunk-control-group label='Формат даты для всплывающего окна'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.dateFormatTooltip"></splunk-text-input>
     </splunk-control-group>
-</form>
-<form class="splunk-formatter-section" section-label="Внешний вид">
     <splunk-control-group label='Название оси Y'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.yAxisName"></splunk-text-input>
+            <splunk-text-input name="{{VIZ_NAMESPACE}}.yAxisName"></splunk-text-input>
     </splunk-control-group>
     <splunk-control-group label='Расстояние по оси X'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.tickInterval" value="50"></splunk-text-input>
+    </splunk-control-group>
+</form>
+<form class="splunk-formatter-section" section-label="Внешний вид">
+    <splunk-control-group label='Тип графика'>
+        <splunk-select name="{{VIZ_NAMESPACE}}.graphType" value="line">
+            <option value="line">Line</option>
+            <option value="area">Area</option>
+        </splunk-select>
     </splunk-control-group>
     <splunk-control-group label='Угол наклона названия по оси X'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.xAngle" value="45"></splunk-text-input>
@@ -22,17 +28,20 @@
             <option value="false">Нет</option>
         </splunk-radio-input>
     </splunk-control-group>
-    <splunk-control-group label='Показывать легенду'>
-        <splunk-radio-input name="{{VIZ_NAMESPACE}}.showLegend" value="false">
-            <option value="true">Да</option>
-            <option value="false">Нет</option>
-        </splunk-radio-input>
-    </splunk-control-group>
     <splunk-control-group label="Цвета">
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color1" value="#fff"></splunk-color-picker>
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color2" value="#a00"></splunk-color-picker>
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color3" value="#00a"></splunk-color-picker>
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color4" value="#0a0"></splunk-color-picker>
+    </splunk-control-group>
+    <splunk-control-group label='Обрабатывать опоздавшие данные'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.lateData" value="false">
+            <option value="true">Да</option>
+            <option value="false">Нет</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+    <splunk-control-group label="Цвет данных">
+        <splunk-color-picker name="{{VIZ_NAMESPACE}}.lateDataColor" value="#fff"></splunk-color-picker>
     </splunk-control-group>
 </form>
 <form class="splunk-formatter-section" section-label="Поведение">
@@ -64,6 +73,14 @@
     </splunk-control-group>
     <splunk-control-group label='Колличество точек'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.downsampleDots" value="$downsampleDotsDash$"></splunk-text-input>
+    </splunk-control-group>
+</form>
+<form class="splunk-formatter-section" section-label="Настройка легенды">
+    <splunk-control-group label='Показывать легенду'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.showLegend" value="false">
+            <option value="true">Да</option>
+            <option value="false">Нет</option>
+        </splunk-radio-input>
     </splunk-control-group>
 </form>
 <form class="splunk-formatter-section" section-label="Масштабирование">

@@ -84,6 +84,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            }
 				
 				var needDownsample = this.getProperty('needDownsample') === 'true';
+				var graphType = this.getProperty('graphType');
 				
 	            //return datum; 
 	            var timeField = 0;
@@ -104,7 +105,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    },
 	                    yAxis: severalAxis && numAxis < 2 ? numAxis++ : 0,
 	                    name: curVal,
-	                    type: 'line',
+	                    type: graphType === 'line' ? 'line' : 'area',
 	                    data: [],
 	                    tooltip: {}
 	                });
@@ -121,7 +122,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            data.results.forEach(function (curResult) {
 	                for (var i = 0, len = otherFields.length; i < len; ++i) {
 	                    var yVal = curResult[otherFields[i]];
-	                    var timestamp = new Date(curResult._time).getTime();
+						var timestamp = new Date(curResult._time).getTime();
 	                    if (yVal) {
 	                        series[i].data.push([timestamp, parseFloat(yVal)]);
 	                        continue;
@@ -139,6 +140,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				});
 
 				// console.log("FormatData series output", series);
+
 	            return { series: series };
 	        },
 	        drilldownLabel: function drilldownLabel(event) {
@@ -156,8 +158,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        //  'data' will be the data object returned from formatData or from the search
 	        //  'config' will be the configuration property object
 	        updateView: function updateView(data, config) {
-	            var _this2 = this;
-				//console.log('UpadateView data input', data);
+				var _this2 = this;
+				
+				console.log('UpadateView data input', data);
+
 				var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
 				var colors = [
 					this.getProperty('color1'), 
@@ -165,7 +169,6 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 					this.getProperty('color3'), 
 					this.getProperty('color4')
 				];
-
 
 	            this.$el.find('#' + this.uniqueId).empty();
 
@@ -184,13 +187,19 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	            var highChart = HighCharts.chart(this.uniqueId, {
 	                chart: {
 	                    zoomType: 'x',
-	                    backgroundColor: "transparent"
+						backgroundColor: "transparent"
 	                },
 	                legend: {
-	                    enabled: this.getProperty('showLegend') === 'true'
+						enabled: this.getProperty('showLegend') === 'true',
+						margin: 0
 					},
 	                plotOptions: {
 	                    line: {
+	                        marker: {
+	                            enabled: this.getProperty('showMarkers') === 'true'
+	                        }
+	                    },
+	                    area: {
 	                        marker: {
 	                            enabled: this.getProperty('showMarkers') === 'true'
 	                        }
@@ -201,7 +210,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                                _this2.drilldownLabel(e);
 	                            }
 	                        }
-	                    }
+						}
 	                },
 	                //colors: ['#237eb2', '#fbb902', '#d64848', '#07912c', '#903030', '#46c35b', '#4a1d6f', '#f60328', '#2d9c89'],
 					colors: colors,
