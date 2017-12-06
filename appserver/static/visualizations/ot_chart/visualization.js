@@ -147,10 +147,16 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				 * А исходные данные укорачиваются на N елементов с конца.
 				 */
 				if(this.getProperty('lateData') === 'true') {
-					var lateDots = parseInt(this.getProperty('lateDots'), 10);
+					var lateDots = needDownsample ? 4 : parseInt(this.getProperty('lateDots'), 10);
 
 					// Для каждой серии данных отбиваем концы.
 					series.forEach(function(seria) {
+						/**
+						 * Можно сделать коротко через seria.data.splice(-lateDots ),
+						 * Но работает примерно в 2 раза медленее, и
+						 * остаютстся дрыки в графике, и иногда странное поведение.
+						 */
+
 						var lastValues = [];
 
 						// Создаём массмив данных, с lateDots колличеством элементов с конца series
@@ -163,8 +169,12 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 						for(var i = 1; i < lateDots; i++) {
 							seria.data.pop();
 						}
+						
 	
-						series.push({
+						return series.push({
+							downsample: {
+								threshold: needDownsample ? parseInt(_this.getProperty('downsampleDots'), 10) : 0
+							},
 							data: lastValues,
 							type: seria.type,
 							name: seria.name,
@@ -173,7 +183,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 					})
 				}
 
-				//console.log("FormatData output", series);
+				console.log("FormatData output", series);
 
 	            return { series: series };
 	        },
