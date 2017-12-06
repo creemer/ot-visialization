@@ -75,7 +75,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        // Optionally implement to format data returned from search.
 	        // The returned object will be passed to updateView as 'data'
 	        formatData: function formatData(data) {
-				//console.log("FormatData data input", data)
+				//console.log("FormatData input", data)
 				
 	            var _this = this;
 				
@@ -105,7 +105,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    },
 	                    yAxis: severalAxis && numAxis < 2 ? numAxis++ : 0,
 	                    name: curVal,
-	                    type: graphType, //=== 'line' ? 'line' : 'area',
+	                    type: graphType,
 	                    data: [],
 	                    tooltip: {}
 	                });
@@ -117,7 +117,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                data.results.sort(function (firstVal, secondVal) {
 	                    return moment(firstVal._time) < moment(secondVal._time) ? -1 : 1;
 	                });
-	            }
+				}
 
 	            data.results.forEach(function (curResult) {
 	                for (var i = 0, len = otherFields.length; i < len; ++i) {
@@ -140,7 +140,40 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                }
 				});
 
-				// console.log("FormatData series output", series);
+				/**
+				 * Отрисовка конца графика(опаздывающих даанных) другим цветом.
+				 * Для это создаётся новый массив данных(новый график), на основе
+				 * последних N элементов исходных данных. 
+				 * А исходные данные укорачиваются на N елементов с конца.
+				 */
+				if(this.getProperty('lateData') === 'true') {
+					var lateDots = parseInt(this.getProperty('lateDots'), 10);
+
+					// Для каждой серии данных отбиваем концы.
+					series.forEach(function(seria) {
+						var lastValues = [];
+
+						// Создаём массмив данных, с lateDots колличеством элементов с конца series
+						for(var i = lateDots, len = seria.data.length; i > 1; i--) {
+							lastValues.push(seria.data[len - i])
+							
+						}
+
+						// Удаляем lateDots элементов с конца series
+						for(var i = 1; i < lateDots; i++) {
+							seria.data.pop();
+						}
+	
+						series.push({
+							data: lastValues,
+							type: seria.type,
+							name: seria.name,
+							_colorIndex: 99 // Индекс цвета в массиве color в updateView
+						});
+					})
+				}
+
+				//console.log("FormatData output", series);
 
 	            return { series: series };
 	        },
@@ -164,7 +197,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				if (!data.series) {
 					return;
 				}
-				console.log('UpadateView data input', data);
+				//console.log('UpadateView data input', data);
 
 				var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
 				var colors = [
@@ -173,6 +206,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 					this.getProperty('color3'), 
 					this.getProperty('color4')
 				];
+				colors[99] = this.getProperty('lateDataColor');
 
 				this.$el.find('#' + this.uniqueId).empty();
 				
