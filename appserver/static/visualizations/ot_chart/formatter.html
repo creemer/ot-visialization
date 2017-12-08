@@ -12,6 +12,12 @@
             <option value="21">21px</option>
         </splunk-select>
     </splunk-control-group>
+    <splunk-control-group label='Показать лейблы оси Х'>
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.showXaxisLabels" value="true">
+            <option value="true">Да</option>
+            <option value="false">Нет</option>
+        </splunk-radio-input>
+    </splunk-control-group>
     <splunk-control-group label='Формат даты для всплывающего окна'>
         <splunk-text-input name="{{VIZ_NAMESPACE}}.dateFormatTooltip"></splunk-text-input>
     </splunk-control-group>
@@ -30,7 +36,7 @@
         </splunk-select>
     </splunk-control-group>
     <splunk-control-group label='Угол наклона названия по оси X'>
-        <splunk-text-input name="{{VIZ_NAMESPACE}}.xAngle" value="45"></splunk-text-input>
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.xAngle" value="0"></splunk-text-input>
     </splunk-control-group>
     <splunk-control-group label='Показывать точки'>
         <splunk-radio-input name="{{VIZ_NAMESPACE}}.showMarkers" value="false">

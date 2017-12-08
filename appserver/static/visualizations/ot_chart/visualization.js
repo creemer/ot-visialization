@@ -69,7 +69,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 
 	            this.uniqueId = 'ot-chart-' + Math.ceil(Math.random() * 100000000);
 	            this.$el.append('<div id="' + this.uniqueId + '" class="highcharts-wrapper"></div>');
-	            // Initialization logic goes here
+				// Initialization logic goes here
+				
+				HighCharts.seriesTypes.line.requireSorting = false;
 	        },
 
 	        // Optionally implement to format data returned from search.
@@ -105,7 +107,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    },
 	                    yAxis: severalAxis && numAxis < 2 ? numAxis++ : 0,
 	                    name: curVal,
-	                    type: graphType,
+	                    type: _this.getProperty('graphType') === 'line' ? 'line' : 'area',
 	                    data: [],
 	                    tooltip: {}
 	                });
@@ -157,6 +159,8 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 						 * остаютстся дрыки в графике, и иногда странное поведение.
 						 */
 
+						if(lateDots >= seria.data.length) return;
+
 						var lastValues = [];
 
 						// Создаём массмив данных, с lateDots колличеством элементов с конца series
@@ -169,7 +173,6 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 						for(var i = 1; i < lateDots; i++) {
 							seria.data.pop();
 						}
-						
 	
 						return series.push({
 							downsample: {
@@ -223,6 +226,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				var legendPosition = this.getProperty('legendPosition');
 				var legendAlign = this.getProperty('legendAlign');
 				var xAxisFontSize = this.getProperty('xAxisFontSize') + 'px';
+				var showXaxisLabels = this.getProperty('showXaxisLabels') === 'true';
 
 	            var containerHeight = this.$el.closest('.viz-controller').height();
 	            this.$el.find('#' + this.uniqueId).css({
@@ -254,7 +258,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    area: {
 	                        marker: {
 	                            enabled: this.getProperty('showMarkers') === 'true'
-	                        }
+							},
+							fillOpacity: 0.5
+
 	                    },
 	                    series: {
 	                        events: {
@@ -279,6 +285,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    tickPixelInterval: parseInt(this.getProperty('tickInterval'), 10) || 50,
 	                    type: 'datetime',
 	                    labels: {
+							enabled: showXaxisLabels,
 	                        formatter: function formatter() {
 	                            var formatOpts = self.getProperty('dateFormatAxis') || 'HH:mm:ss';
 	                            //console.log('formatOpts ', formatOpts);
@@ -355,7 +362,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                series: data.series
 				});
 				
-				let id =  '#' + this.uniqueId;
+				var id =  '#' + this.uniqueId;
 				$(id).css('position', 'relative');
 				
 				var button = document.createElement('div');
