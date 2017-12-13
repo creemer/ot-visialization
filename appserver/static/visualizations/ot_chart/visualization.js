@@ -253,14 +253,15 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    line: {
 	                        marker: {
 	                            enabled: this.getProperty('showMarkers') === 'true'
-	                        }
+							},
+							animation: false
 	                    },
 	                    area: {
 	                        marker: {
 	                            enabled: this.getProperty('showMarkers') === 'true'
 							},
-							fillOpacity: 0.5
-
+							fillOpacity: 0.5,
+							animation: false
 	                    },
 	                    series: {
 	                        events: {
