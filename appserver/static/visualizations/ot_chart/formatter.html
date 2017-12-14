@@ -44,20 +44,21 @@
             <option value="false">Нет</option>
         </splunk-radio-input>
     </splunk-control-group>
+    <splunk-control-group label='Размер точек'>
+        <splunk-select name="{{VIZ_NAMESPACE}}.markersSize" value="3">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </splunk-select>
+    </splunk-control-group>
     <splunk-control-group label="Цвета">
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color1" value="#000"></splunk-color-picker>
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color2" value="#a00"></splunk-color-picker>
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color3" value="#00a"></splunk-color-picker>
         <splunk-color-picker name="{{VIZ_NAMESPACE}}.color4" value="#0a0"></splunk-color-picker>
-    </splunk-control-group>
-    <splunk-control-group label='Обрабатывать опоздавшие данные'>
-        <splunk-radio-input name="{{VIZ_NAMESPACE}}.lateData" value="false">
-            <option value="true">Да</option>
-            <option value="false">Нет</option>
-        </splunk-radio-input>
-    </splunk-control-group>
-    <splunk-control-group label="Цвет данных">
-        <splunk-color-picker name="{{VIZ_NAMESPACE}}.lateDataColor" value="#fff"></splunk-color-picker>
     </splunk-control-group>
 </form>
 <form class="splunk-formatter-section" section-label="Поведение">

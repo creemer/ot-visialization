@@ -252,13 +252,15 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                plotOptions: {
 	                    line: {
 	                        marker: {
-	                            enabled: this.getProperty('showMarkers') === 'true'
+								enabled: this.getProperty('showMarkers') === 'true',
+								radius: parseInt(this.getProperty('markersSize'), 10), // Dots size
 							},
 							animation: false
 	                    },
 	                    area: {
 	                        marker: {
-	                            enabled: this.getProperty('showMarkers') === 'true'
+								enabled: this.getProperty('showMarkers') === 'true',
+								radius: parseInt(this.getProperty('markersSize'), 10), // Dots size
 							},
 							fillOpacity: 0.5,
 							animation: false
