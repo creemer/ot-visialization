@@ -122,9 +122,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				}
 
 	            data.results.forEach(function (curResult) {
-	                for (var i = 0, len = otherFields.length; i < len; ++i) {
-	                    var yVal = curResult[otherFields[i]];
-						var timestamp = new Date(curResult._time).getTime();
+	                for (let i = 0, len = otherFields.length; i < len; ++i) {
+	                    let yVal = curResult[otherFields[i]];
+						let timestamp = new Date(curResult._time).getTime();
 						
 	                    if (yVal) {
 	                        series[i].data.push([timestamp, parseFloat(yVal)]);
@@ -161,16 +161,16 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 
 						if(lateDots >= seria.data.length) return;
 
-						var lastValues = [];
+						let lastValues = [];
 
 						// Создаём массмив данных, с lateDots колличеством элементов с конца series
-						for(var i = lateDots, len = seria.data.length; i > 1; i--) {
+						for(let i = lateDots, len = seria.data.length; i > 1; i--) {
 							lastValues.push(seria.data[len - i])
 							
 						}
 
 						// Удаляем lateDots элементов с конца series
-						for(var i = 1; i < lateDots; i++) {
+						for(let i = 1; i < lateDots; i++) {
 							seria.data.pop();
 						}
 	
@@ -186,7 +186,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 					})
 				}
 
-				console.log("FormatData output", series);
+				//console.log("FormatData output", series);
+				otherFields = null;
+				data = null;
 
 	            return { series: series };
 	        },
@@ -211,6 +213,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 					return;
 				}
 				//console.log('UpadateView data input', data);
+				var id =  '#' + this.uniqueId;
 
 				var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
 				var colors = [
@@ -221,7 +224,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				];
 				colors[99] = this.getProperty('lateDataColor');
 
-				this.$el.find('#' + this.uniqueId).empty();
+				this.$el.find(id).empty();
 				
 				var legendPosition = this.getProperty('legendPosition');
 				var legendAlign = this.getProperty('legendAlign');
@@ -229,7 +232,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				var showXaxisLabels = this.getProperty('showXaxisLabels') === 'true';
 
 	            var containerHeight = this.$el.closest('.viz-controller').height();
-	            this.$el.find('#' + this.uniqueId).css({
+	            this.$el.find(id).css({
 	                height: containerHeight - 30 + 'px'
 				});
 
@@ -365,17 +368,19 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                series: data.series
 				});
 				
-				var id =  '#' + this.uniqueId;
-				$(id).css('position', 'relative');
-				
-				var button = document.createElement('div');
-				button.setAttribute('id', 'btn-full-screen-chart');
-				button.innerHTML = '&#128269;';
+				if(!document.querySelector(id + ' > btn-full-screen-chart')) {
+					$(id).css('position', 'relative');
+					
+					var button = document.createElement('div');
+					button.setAttribute('id', 'btn-full-screen-chart');
+					button.innerHTML = '&#128269;';
 
-				$(id).append(button);
+					$(id).append(button);
 
-				button.addEventListener('click', function(event) { self.toggleFullScreen(); });
+					button.addEventListener('click', function(event) { self.toggleFullScreen(); });
+				}
 
+				data = null;
 	            //console.timeEnd('updateView');
 			},
 
@@ -28157,7 +28162,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	                    var point_x = typeof opt.pointStart != 'undefined' ? opt.pointStart : 0; // First X
 	                    var pointInterval = typeof opt.pointInterval != 'undefined' ? opt.pointInterval : 1;
 	                    // Turn it into array of arrays with two values.
-	                    for (var i = 0, len = arguments[1].length; i < len; i++) {
+	                    for (let i = 0, len = arguments[1].length; i < len; i++) {
 	                        arguments[1][i] = [point_x, arguments[1][i]];
 	                        point_x += pointInterval;
 	                    }

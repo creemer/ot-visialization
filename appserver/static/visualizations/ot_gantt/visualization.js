@@ -215,7 +215,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
 	            var categories = {};
 
-	            for (var i = 0, len = this.categories.length; i < len; ++i) {
+	            for (let i = 0, len = this.categories.length; i < len; ++i) {
 	                categories[this.categories[i]] = {
 	                    category: this.categories[i],
 	                    idx: -1,
@@ -223,10 +223,10 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                }
 	            }
 
-	            for (var i = 0, len = rows.length; i < len; ++i) {
-	                var curRow = rows[i];
-	                var curCategory = curRow[this.catNum];
-	                var start = moment(curRow[this.timeNum]).diff(this.startDate, 'seconds');
+	            for (let i = 0, len = rows.length; i < len; ++i) {
+	                let curRow = rows[i];
+	                let curCategory = curRow[this.catNum];
+	                let start = moment(curRow[this.timeNum]).diff(this.startDate, 'seconds');
 	                categories[curCategory].idx = this.idxNum ? curRow[this.idxNum] : -1;
 	                categories[curCategory].segments.push({
 	                	"formattedStart": moment(curRow[this.timeNum]).format('HH:mm:ss'),
@@ -239,6 +239,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                });
 				};
 				
+				rows = null;
 				// console.log('---------format--------');
 				// console.log('Categories from format', categories);
 				// console.log('stateColors from format', this.statesColors);
@@ -255,7 +256,9 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	            		//console.log('CATEGORY');
 		            	return val1.category < val2.category ? -1 : 1
 	            	}
-	            });
+				});
+				
+				data = null;
 
 	            return retCategories;
 	        },
@@ -339,7 +342,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 
 	            var legend = [];
 
-	            for (var i in this.statesColors) {
+	            for (let i in this.statesColors) {
 	                legend.push({
 	                    title: i,
 	                    color: this.statesColors[i]
@@ -417,15 +420,23 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils","splunkjs/m
 	                }]
 				});
 				
-				// создаём кнопку развертывания на весь экран
-				$(id).css('position', 'relative');
-				var button = document.createElement('div');
-				button.setAttribute('id', 'btn-full-screen-gantt');
-				button.innerHTML = '&#128269;';
+				if(!document.querySelector(id + ' > btn-full-screen-gantt')) {
+					console.log('Creating fullscreen button');
 
-				$(id).append(button);
+					// создаём кнопку развертывания на весь экран
+					$(id).css('position', 'relative');
+					var button = document.createElement('div');
+					button.setAttribute('id', 'btn-full-screen-gantt');
+					button.innerHTML = '&#128269;';
+	
+					$(id).append(button);
+	
+					button.addEventListener('click', function(event) { self.toggleFullScreen(); })
+				}
 
-				button.addEventListener('click', function(event) { self.toggleFullScreen(); })
+				legend = null;
+				categories = null;
+				config = null;
 
 	        }, // End UpdateView
 
