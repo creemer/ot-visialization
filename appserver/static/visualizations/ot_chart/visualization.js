@@ -77,7 +77,7 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        // Optionally implement to format data returned from search.
 	        // The returned object will be passed to updateView as 'data'
 	        formatData: function formatData(data) {
-				//console.log("FormatData input", data)
+				console.log("FormatData input", data)
 				
 	            var _this = this;
 				
@@ -181,12 +181,12 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 							data: lastValues,
 							type: seria.type,
 							name: seria.name,
-							_colorIndex: 99 // Индекс цвета в массиве color в updateView
+							_colorIndex: 9999 // Индекс цвета в массиве color в updateView
 						});
 					})
 				}
 
-				//console.log("FormatData output", series);
+				console.log("FormatData output", series);
 				otherFields = null;
 				data = null;
 
@@ -208,22 +208,44 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 	        //  'config' will be the configuration property object
 	        updateView: function updateView(data, config) {
 				var self = this;
-				
-				if (!data.series) {
+				console.log('data.series', data.series);
+
+				/* if (!data.series) {
 					return;
-				}
+				} */
 				//console.log('UpadateView data input', data);
 				var id =  '#' + this.uniqueId;
 
 				var severalAxis = this.getProperty('severalYAxis') === 'true' || false;
-				var colors = [
-					this.getProperty('color1'), 
-					this.getProperty('color2'), 
-					this.getProperty('color3'), 
-					this.getProperty('color4')
-				];
-				colors[99] = this.getProperty('lateDataColor');
+				
+				/**
+				 * Generating random colors, or take firs 16 from variables(in formatter.html)
+				 * And generate last colors to 100 by random
+				 */
+				var colors = [];
 
+				if(this.getProperty('randomColors') === 'true' || true) {
+					
+					for(let i = 0; i < 100; i++) {
+						colors[i] = "#"+((1<<24)*Math.random()|0).toString(16); // generate random color.
+					};
+
+				} else {
+
+					for(let i = 1; i <= 16; i++) {
+						let colorName = 'color' + i;
+						colors.push(this.getProperty(colorName))
+					}
+	
+					for(let i = colors.length; i < 100; i++) {
+						colors[i] = "#"+((1<<24)*Math.random()|0).toString(16); // generate random color.
+					};
+
+				}
+
+				colors[9999] = this.getProperty('lateDataColor');
+
+				console.log('Colors', colors);
 				this.$el.find(id).empty();
 				
 				var legendPosition = this.getProperty('legendPosition');
@@ -415,16 +437,13 @@ define(["api/SplunkVisualizationBase","api/SplunkVisualizationUtils"], function(
 				}
 			},
 
-	        // Search data params
-	        getInitialDataParams: function getInitialDataParams() {
-	            return {
-	                outputMode: SplunkVisualizationBase.RAW_OUTPUT_MODE,
-	                count: 0
-	            };
-	        },
-
 	        // Override to respond to re-sizing events
-	        reflow: function reflow() {}
+	        reflow: function reflow() {
+				/**
+				 * Trigger event, to update view, without data reformating.
+				 */
+				this.trigger('invalidateUpdateView');
+			}
 	    });
 	}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
